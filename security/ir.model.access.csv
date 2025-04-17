@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_onboarding_offboarding,onboarding_offboarding,model_onboarding_offboarding,base.group_user,1,1,1,1
+access_hr_candidate_cv,hr.candidate.cv,model_hr_candidate_cv,base.group_user,1,1,1,1
