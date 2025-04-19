@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+    <!-- hr.employee view -->
     <record id="view_hr_employee_form_inherit_materials" model="ir.ui.view">
         <field name="name">hr.employee.form.inherit.materials</field>
         <field name="model">hr.employee</field>
@@ -12,80 +13,108 @@
         </field>
     </record>
 
-<!--  -->
-<record id="employee_material_form" model="ir.ui.view">
-            <field name="name">employee.material.form</field>
-            <field name="model">employee.material</field>
-            <field name="arch" type="xml">
-                <form string="Employee Material">
-                    <sheet>
-                        <group>
-                            <field name="employee_id" />
-                            <field name="material_name"/>
-                            <field name="description"/>
-                            <field name="date_assigned"/>
-                        </group>
-                    </sheet>
-                </form>
-            </field>
-        </record>
+    <!-- employee.material views -->
+    <record id="employee_material_form" model="ir.ui.view">
+        <field name="name">employee.material.form</field>
+        <field name="model">employee.material</field>
+        <field name="arch" type="xml">
+            <form string="Employee Material">
+                <sheet>
+                    <group>
+                        <field name="employee_id"/>
+                        <field name="material_name"/>
+                        <field name="serial_number"/>
+                        <field name="description"/>
+                        <field name="date_assigned"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
 
-        <record id="employee_material_tree" model="ir.ui.view">
-            <field name="name">employee.material.tree</field>
-            <field name="model">employee.material</field>
-            <field name="arch" type="xml">
-                <tree string="Employee Materials">
-                    <field name="employee_id"/>
-                    <field name="material_name"/>
-                    <field name="description"/>
-                    <field name="date_assigned"/>
-                </tree>
-            </field>
-        </record>
+    <record id="employee_material_tree" model="ir.ui.view">
+        <field name="name">employee.material.tree</field>
+        <field name="model">employee.material</field>
+        <field name="arch" type="xml">
+            <tree string="Employee Materials">
+                <field name="employee_id"/>
+                <field name="material_name"/>
+                <field name="serial_number"/>
+                <field name="description"/>
+                <field name="date_assigned"/>
+            </tree>
+        </field>
+    </record>
 
-        <record id="employee_material_action" model="ir.actions.act_window">
-            <field name="name">Employee Materials</field>
-            <field name="res_model">employee.material</field>
-            <field name="view_mode">tree,form</field>
-        </record>
-
-    <!-- Action pour afficher la liste des CV -->
-
-        <record id="action_hr_materials" model="ir.actions.act_window">
-        <field name="name"  >Ressources et accès</field>
+    <record id="employee_material_action" model="ir.actions.act_window">
+        <field name="name">Employee Materials</field>
         <field name="res_model">employee.material</field>
         <field name="view_mode">tree,form</field>
     </record>
-    <!-- Ajout du menu sous "Employee" -->
 
-    <menuitem id="menu_hr_materials"
-              name="Ressources et accès"
-              parent="hr.menu_hr_root"
-              action="action_hr_materials"/>
+    <!-- employee.access views -->
+    <record id="employee_access_form" model="ir.ui.view">
+        <field name="name">employee.access.form</field>
+        <field name="model">employee.access</field>
+        <field name="arch" type="xml">
+            <form string="Employee Access">
+                <sheet>
+                    <group>
+                        <field name="employee_id"/>
+                        <field name="access_for"/>
+                        <field name="start_date"/>
+                        <field name="end_date"/>
+                        <field name="description"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
 
+    <record id="employee_access_tree" model="ir.ui.view">
+        <field name="name">employee.access.tree</field>
+        <field name="model">employee.access</field>
+        <field name="arch" type="xml">
+            <tree string="Employee Access">
+                <field name="employee_id"/>
+                <field name="access_for"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="description"/>
+            </tree>
+        </field>
+    </record>
 
+    <record id="employee_access_action" model="ir.actions.act_window">
+        <field name="name">Employee Access</field>
+        <field name="res_model">employee.access</field>
+        <field name="view_mode">tree,form</field>
+    </record>
 
-<!--  -->
-<record id="view_hr_CV" model="ir.ui.view">
-    <field name="name">hr.CV</field>
-    <field name="model">hr.job</field>
-    <field name="inherit_id" ref="hr_recruitment.hr_job_simple_form"/>
-    <field name="arch" type="xml">
-        <!-- supprimer le champs -->
-         <xpath expr="//field[@name='name']" position="replace">
-                </xpath>
-        <!-- ajouter le champs -->
-        <xpath expr="//group" position="inside">
-            <group string="Critère de recherche">
-                <field name="name"/>
-                <field name="experience"/>
-                <field name="key_words"/>
-                <field name="skills"/>
-            </group>
-        </xpath>
-    </field>
-</record>
-<record id="view_hr_candidate_cv_tree" model="ir.ui.view">
+    <!-- Menu for materials and access -->
+    <menuitem id="menu_hr_materials_access" name="Ressources et Accès" parent="hr.menu_hr_root"/>
+    <menuitem id="menu_hr_materials" name="Matériels" parent="menu_hr_materials_access" action="employee_material_action"/>
+    <menuitem id="menu_hr_access" name="Accès" parent="menu_hr_materials_access" action="employee_access_action"/>
+
+    <!-- hr.job view -->
+    <record id="view_hr_job_form_inherit" model="ir.ui.view">
+        <field name="name">hr.job.form.inherit</field>
+        <field name="model">hr.job</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_job_simple_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group" position="inside">
+                <group string="Critère de recherche">
+                    <field name="name"/>
+                    <field name="experience"/>
+                    <field name="key_words"/>
+                    <field name="skills"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- hr.candidate.cv views -->
+    <record id="view_hr_candidate_cv_tree" model="ir.ui.view">
         <field name="name">hr.candidate.cv.tree</field>
         <field name="model">hr.candidate.cv</field>
         <field name="arch" type="xml">
@@ -113,42 +142,40 @@
                         <field name="application_date"/>
                         <field name="departement"/>
                         <field name="ats_score"/>
+                        <field name="extracted_text" widget="text" readonly="1"/>
                     </group>
                 </sheet>
             </form>
         </field>
     </record>
 
-    <!-- Action pour afficher la liste des CV -->
     <record id="action_hr_candidate_cv" model="ir.actions.act_window">
-        <field name="name"  >CV des Candidats</field>
+        <field name="name">CV des Candidats</field>
         <field name="res_model">hr.candidate.cv</field>
         <field name="view_mode">tree,form</field>
     </record>
 
-    <!-- Ajout du menu sous "Recrutement" -->
-    <menuitem id="menu_hr_candidate_cv"
-              name="CV des Candidats"
-              parent="hr_recruitment.menu_hr_recruitment_root"
-              action="action_hr_candidate_cv"/>
+    <menuitem id="menu_hr_candidate_cv" name="CV des Candidats" parent="hr_recruitment.menu_hr_recruitment_root" action="action_hr_candidate_cv"/>
 
-<record id="view_hr_applicant_form_inherit_cv" model="ir.ui.view">
-    <field name="name">hr.applicant.form.inherit.cv</field>
-    <field name="model">hr.applicant</field>
-    <field name="inherit_id" ref="hr_recruitment.hr_applicant_view_form"/>
-    <field name="arch" type="xml">
-        <!-- On insère après le champ "email_from" par exemple -->
-        <xpath expr="//field[@name='email_from']" position="after">
-            <group string="CV et Score ATS">
-                <field name="cv_file" filename="cv_filename"/>
-                <field name="ats_score" readonly="1"/>
-            </group>
+    <!-- hr.applicant view -->
+    <record id="view_hr_applicant_form_inherit_cv" model="ir.ui.view">
+        <field name="name">hr.applicant.form.inherit.cv</field>
+        <field name="model">hr.applicant</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_applicant_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='email_from']" position="after">
+                <group string="CV et Score ATS">
+                    <field name="cv_file" filename="cv_filename"/>
+                    <field name="ats_score" readonly="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Website template -->
+    <template id="website_hr_recruitment_apply_form_inherit" inherit_id="website_hr_recruitment.apply">
+        <xpath expr="//input[@name='Resume']" position="replace">
+            <input type="file" name="cv_file" accept=".pdf" required="1"/>
         </xpath>
-    </field>
-</record>
-<template id="website_hr_recruitment_apply_form_inherit" inherit_id="website_hr_recruitment.apply">
-    <xpath expr="//input[@name='Resume']" position="replace">
-        <input type="file" name="cv_file" accept=".pdf" required="1"/>
-    </xpath>
-</template>
+    </template>
 </odoo>
