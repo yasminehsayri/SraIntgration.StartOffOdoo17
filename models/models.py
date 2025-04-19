@@ -2,10 +2,6 @@ from odoo import models, fields, api
 import base64
 import io
 import PyPDF2
-import logging
-from odoo import http
-from odoo.http import request
-from odoo.addons.website_hr_recruitment.controllers.main import WebsiteHrRecruitment
 
 class OnboardingOffboarding(models.Model):
     _name = "onboarding.offboarding"
@@ -53,109 +49,6 @@ class HrJob(models.Model):
     key_words = fields.Text(string="Mots Clés")
     skills = fields.Text(string="Compétences")
 
-class HrApplicant(models.Model):
-    _inherit = 'hr.applicant'
-
-    cv_file = fields.Binary(string="CV (PDF)")
-    cv_filename = fields.Char(string="Nom du fichier CV")
-    ats_score = fields.Float(string="Score ATS", store=True)
-
-    @api.model
-    def create(self, vals):
-        """ Surcharge de la méthode create pour traiter le CV et calculer le score ATS """
-        applicant = super(HrApplicant, self).create(vals)
-
-        # Vérifier si un fichier CV est fourni et si un poste est associé
-        if applicant.cv_file and applicant.job_id:
-            # Créer un enregistrement dans hr.candidate.cv
-            cv_record = self.env['hr.candidate.cv'].create({
-                'name': applicant.id,
-                'job_id': applicant.job_id.id,
-                'cv_file': applicant.cv_file,
-                'cv_filename': applicant.cv_filename or "cv.pdf",
-                'departement': applicant.department_id.name if applicant.department_id else "Non spécifié",
-            })
-
-            # Calculer le score ATS et mettre à jour les deux modèles
-            score = cv_record._calculate_ats_score()
-            cv_record.ats_score = score
-            applicant.ats_score = score
-        else:
-            applicant.ats_score = 0.0
-
-        return applicant
-
-    @api.onchange('cv_file')
-    def _onchange_cv_file(self):
-        """ Conserver la méthode onchange pour le backend """
-        if self.cv_file and self.job_id:
-            cv_record = self.env['hr.candidate.cv'].create({
-                'name': self.id,
-                'job_id': self.job_id.id,
-                'cv_file': self.cv_file,
-                'cv_filename': self.cv_filename or "cv.pdf",
-                'departement': self.department_id.name if self.department_id else "Non spécifié",
-            })
-            score = cv_record._calculate_ats_score()
-            cv_record.ats_score = score
-            self.ats_score = score
-        else:
-            self.ats_score = 0.0
-_logger = logging.getLogger(__name__)
-'''this one'''
-class WebsiteHrRecruitmentCustom(WebsiteHrRecruitment):
-    @http.route(['/jobs/apply/<model("hr.job"):job>'], type='http', auth="public", website=True, sitemap=True)
-    def jobs_apply(self, job, **kwargs):
-        _logger.info("Custom jobs_apply called for job: %s", job.name)
-        result = super(WebsiteHrRecruitmentCustom, self).jobs_apply(job, **kwargs)
-
-        if request.httprequest.method == 'POST':
-            _logger.info("POST request received. Form data: %s", request.httprequest.files)
-            cv_file = request.httprequest.files.get('cv_file') or request.httprequest.files.get('ufile')
-            if cv_file:
-                _logger.info("CV file received: %s", cv_file.filename)
-                try:
-                    if not cv_file.filename.lower().endswith('.pdf'):
-                        _logger.warning("Invalid file type uploaded: %s", cv_file.filename)
-                        return request.redirect('/jobs/apply/%s?error=invalid_file' % job.id)
-
-                    cv_content = cv_file.read()
-                    cv_filename = cv_file.filename
-                    applicant = request.env['hr.applicant'].sudo().search(
-                        [('job_id', '=', job.id)], order='id desc', limit=1
-                    )
-                    if applicant:
-                        _logger.info("Updating applicant %s with CV: %s", applicant.id, cv_filename)
-                        applicant.write({
-                            'cv_file': base64.b64encode(cv_content),
-                            'cv_filename': cv_filename,
-                        })
-                        # Trigger ATS score calculation
-                        if applicant.job_id:
-                            _logger.info("Creating hr.candidate.cv for applicant %s", applicant.id)
-                            cv_record = request.env['hr.candidate.cv'].sudo().create({
-                                'name': applicant.id,
-                                'job_id': applicant.job_id.id,
-                                'cv_file': applicant.cv_file,
-                                'cv_filename': cv_filename or "cv.pdf",
-                                'departement': applicant.department_id.name if applicant.department_id else "Non spécifié",
-                            })
-                            score = cv_record._calculate_ats_score()
-                            _logger.info("ATS score calculated: %s for CV record %s", score, cv_record.id)
-                            cv_record.ats_score = score
-                            applicant.ats_score = score
-                        else:
-                            _logger.warning("No job_id for applicant %s", applicant.id)
-                    else:
-                        _logger.warning("No applicant found for job %s", job.id)
-                except Exception as e:
-                    _logger.error("Error processing CV file: %s", str(e))
-                    return request.redirect('/jobs/apply/%s?error=file_processing' % job.id)
-            else:
-                _logger.warning("No CV file found in form data")
-
-        return result
-
 
 class CandidateCV(models.Model):
     _name = "hr.candidate.cv"
@@ -180,13 +73,12 @@ class CandidateCV(models.Model):
             res.ats_score = res._calculate_ats_score()
         return res'''
 
-    @api.model
-    def create(self, vals):
-        print("Création d'un enregistrement hr.candidate.cv avec vals:", vals)
-        record = super(CandidateCV, self).create(vals)
-        if record.cv_file:
-            record.ats_score = record._calculate_ats_score()
-        return record
+    class HrApplicant(models.Model):
+        _inherit = 'hr.applicant'
+
+        ats_score = fields.Float(string="ATS Score", compute='_compute_ats_score', store=True)
+
+
 
 
 
