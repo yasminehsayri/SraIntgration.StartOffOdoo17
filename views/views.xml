@@ -131,4 +131,24 @@
               name="CV des Candidats"
               parent="hr_recruitment.menu_hr_recruitment_root"
               action="action_hr_candidate_cv"/>
+
+<record id="view_hr_applicant_form_inherit_cv" model="ir.ui.view">
+    <field name="name">hr.applicant.form.inherit.cv</field>
+    <field name="model">hr.applicant</field>
+    <field name="inherit_id" ref="hr_recruitment.hr_applicant_view_form"/>
+    <field name="arch" type="xml">
+        <!-- On insère après le champ "email_from" par exemple -->
+        <xpath expr="//field[@name='email_from']" position="after">
+            <group string="CV et Score ATS">
+                <field name="cv_file" filename="cv_filename"/>
+                <field name="ats_score" readonly="1"/>
+            </group>
+        </xpath>
+    </field>
+</record>
+<template id="website_hr_recruitment_apply_form_inherit" inherit_id="website_hr_recruitment.apply">
+    <xpath expr="//input[@name='Resume']" position="replace">
+        <input type="file" name="cv_file" accept=".pdf" required="1"/>
+    </xpath>
+</template>
 </odoo>
