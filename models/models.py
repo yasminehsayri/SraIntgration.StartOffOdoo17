@@ -117,8 +117,11 @@ class WebsiteHrRecruitmentCustom(WebsiteHrRecruitment):
 
                     cv_content = cv_file.read()
                     cv_filename = cv_file.filename
+
+                    # Rechercher la candidature par email ou autres critères uniques
+                    email = request.params.get('email')
                     applicant = request.env['hr.applicant'].sudo().search(
-                        [('job_id', '=', job.id), ('create_date', '>=', fields.Datetime.now() - relativedelta(seconds=30))],
+                        [('job_id', '=', job.id), ('email_from', '=', email)],
                         order='id desc', limit=1
                     )
                     if applicant:
@@ -129,7 +132,7 @@ class WebsiteHrRecruitmentCustom(WebsiteHrRecruitment):
                         })
                         applicant._process_cv_and_score()
                     else:
-                        _logger.warning("No applicant found for job %s", job.id)
+                        _logger.warning("No applicant found for job %s with email %s", job.id, email)
                         return request.redirect('/jobs/apply/%s?error=no_applicant' % job.id)
                 except Exception as e:
                     _logger.error("Error processing CV file: %s", str(e))
