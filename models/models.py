@@ -27,6 +27,8 @@ class HrEmployee(models.Model):
 
     birthday = fields.Date(string="Date de naissance")
     age = fields.Integer(string="Age", compute="_compute_age", store=True)
+    material_ids = fields.One2many('employee.material', 'employee_id', string="Materials")
+    access_ids = fields.One2many('employee.access', 'employee_id', string="Access")
 
     @api.depends('birthday')
     def _compute_age(self):

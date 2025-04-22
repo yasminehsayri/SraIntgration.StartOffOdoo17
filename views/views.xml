@@ -9,6 +9,16 @@
             <xpath expr="//group//field[@name='work_phone']" position="after">
                 <field name="birthday"/>
                 <field name="age" invisible="1"/>
+                <button name="%(employee_material_action)d"
+                        type="action"
+                        class="oe_stat_button"
+                        icon="fa-file"
+                        string="Ressources"/>
+                <button name="%(employee_access_action)d"
+                        type="action"
+                        class="oe_stat_button"
+                        icon="fa-file"
+                        string="Acces"/>
             </xpath>
         </field>
     </record>
