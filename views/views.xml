@@ -6,7 +6,7 @@
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//group//field[@name='work_phone']" position="after">
+            <xpath expr="//group//field[@name='work_email']" position="after">
                 <field name="birthday"/>
                 <field name="age" invisible="1"/>
                 <button name="%(employee_material_action)d"
@@ -60,6 +60,7 @@
         <field name="name">Employee Materials</field>
         <field name="res_model">employee.material</field>
         <field name="view_mode">tree,form</field>
+        <field name="domain">[('employee_id', '=', context.get('active_id'))]</field>
     </record>
 
     <!-- employee.access views -->
@@ -99,6 +100,7 @@
         <field name="name">Employee Access</field>
         <field name="res_model">employee.access</field>
         <field name="view_mode">tree,form</field>
+        <field name="domain">[('employee_id', '=', context.get('active_id'))]</field>
     </record>
 
     <!-- Menu for materials and access -->
