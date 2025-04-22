@@ -131,7 +131,7 @@
         <field name="model">hr.candidate.cv</field>
         <field name="arch" type="xml">
             <tree>
-                <field name="name"/>
+                <field name="name" widget="many2one"/>
                 <field name="job_id"/>
                 <field name="cv_filename"/>
                 <field name="departement"/>

@@ -72,22 +72,29 @@ class HrApplicant(models.Model):
         return True
 
     def _process_cv_and_score(self):
-        """Shared method to process CV and calculate ATS score."""
         if self.cv_file and self.job_id:
             if not self._validate_cv_file(base64.b64decode(self.cv_file), self.cv_filename):
                 self.ats_score = 0.0
                 return
+            # S'assurer que l'enregistrement hr.applicant est enregistré
+            if not self.id:
+                _logger.warning("hr.applicant not saved yet, cannot create hr.candidate.cv")
+                self.ats_score = 0.0
+                return
+            # Créer l'enregistrement hr.candidate.cv
             cv_record = self.env['hr.candidate.cv'].create({
-                'name': self.id,
+                'name': self.id,  # self.id est l'ID de hr.applicant
                 'job_id': self.job_id.id,
                 'cv_file': self.cv_file,
                 'cv_filename': self.cv_filename or "cv.pdf",
                 'departement': self.department_id.name if self.department_id else "Non spécifié",
             })
             score = cv_record._calculate_ats_score()
+            _logger.info("Calculated ATS score: %s for applicant %s", score, self.id)
             cv_record.ats_score = score
             self.ats_score = score
         else:
+            _logger.warning("No cv_file or job_id provided, setting ATS score to 0")
             self.ats_score = 0.0
 
     @api.model
@@ -145,20 +152,7 @@ class CandidateCV(models.Model):
     _name = "hr.candidate.cv"
     _description = "CV des candidats"
 
-    name = fields.Integer(
-        string='Candidate ID',
-        help='ID de la candidature'
-    )  # Champ existant, conservé comme ID numérique
-    applicant_id = fields.Many2one(
-        comodel_name='hr.applicant',
-        string='Applicant',
-        help='Lien vers la candidature'
-    )
-    applicant_name = fields.Char(
-        string='Applicant Name',
-        related='applicant_id.name',
-
-    )
+    name = fields.Many2one('hr.applicant', string="Nom du candidat")
     job_id = fields.Many2one('hr.job', string="Poste visé", required=True, ondelete='cascade')
     cv_file = fields.Binary(string="CV (PDF)")
     cv_filename = fields.Char(string="CV du candidat")
