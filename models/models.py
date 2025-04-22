@@ -145,7 +145,20 @@ class CandidateCV(models.Model):
     _name = "hr.candidate.cv"
     _description = "CV des candidats"
 
-    name = fields.Many2one('hr.applicant', string="Nom du candidat")
+    name = fields.Integer(
+        string='Candidate ID',
+        help='ID de la candidature'
+    )  # Champ existant, conservé comme ID numérique
+    applicant_id = fields.Many2one(
+        comodel_name='hr.applicant',
+        string='Applicant',
+        help='Lien vers la candidature'
+    )
+    applicant_name = fields.Char(
+        string='Applicant Name',
+        related='applicant_id.name',
+
+    )
     job_id = fields.Many2one('hr.job', string="Poste visé", required=True, ondelete='cascade')
     cv_file = fields.Binary(string="CV (PDF)")
     cv_filename = fields.Char(string="CV du candidat")
