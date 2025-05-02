@@ -69,29 +69,41 @@ class HrJob(models.Model):
     keyword_ids = fields.One2many('hr.job.keyword','job_id', string="Mots-clés pondérés")
     skill_ids = fields.One2many('hr.job.skill','job_id', string="Compétences pondérées")
 
-
     def _get_keywords(self):
         """Extract job keywords from weighted fields and custom fields."""
         keywords = []
-        # Use weighted fields from One2many relations
+
+        # Use weighted fields from One2many relations for keyword_ids, skill_ids, experience_ids
         for keyword in self.keyword_ids:
-            keywords.append(keyword.name.lower())
+            keywords.append((keyword.name.lower(), keyword.weight))
         for skill in self.skill_ids:
-            keywords.append(skill.name.lower())
+            keywords.append((skill.name.lower(), skill.weight))
         for experience in self.experience_ids:
-            keywords.append(experience.name.lower())
+            keywords.append((experience.name.lower(), experience.weight))
+
         # Fallback to custom fields if defined (from parent view)
         try:
             if self.key_words:
-                keywords.extend(self.key_words.lower().replace(",", " ").split())
+                custom_keywords = self.key_words.lower().replace(",", " ").split()
+                for kw in custom_keywords:
+                    keywords.append((kw, 1))  # Default weight for custom keywords
             if self.experience:
-                keywords.extend(self.experience.lower().replace(",", " ").split())
+                custom_experiences = self.experience.lower().replace(",", " ").split()
+                for exp in custom_experiences:
+                    keywords.append((exp, 1))  # Default weight for custom experiences
             if self.skills:
-                keywords.extend(self.skills.lower().replace(",", " ").split())
+                custom_skills = self.skills.lower().replace(",", " ").split()
+                for skill in custom_skills:
+                    keywords.append((skill, 1))  # Default weight for custom skills
         except AttributeError:
             _logger.warning("Custom fields key_words, experience, or skills not defined in hr.job")
+
+        # Removing duplicates while maintaining the keyword and its associated weight
         keywords = list(set(keywords))
+
+        # Logging for reference
         _logger.info("Extracted keywords for job %s: %s", self.name, keywords)
+
         return keywords
 
 class HrApplicant(models.Model):
@@ -251,35 +263,43 @@ class CandidateCV(models.Model):
     def _calculate_ats_score(self):
         """Calculate ATS score based on job keywords and CV text."""
         _logger.info("Calculating ATS score for CV %s, job %s", self.id, self.job_id.name)
+
+        # Vérifie que job_id et cv_file existent
         if not self.job_id or not self.cv_file:
             _logger.warning("Missing job_id or cv_file for CV %s", self.id)
             return 0.0
 
-        keywords = self.job_id._get_keywords()
-        text = self._extract_text_from_pdf(self.cv_file)
+        # Extraction des mots-clés et du texte du CV
+        keywords = self.job_id._get_keywords()  # Cette fonction doit retourner les mots-clés avec leurs poids
+        text = self._extract_text_from_pdf(self.cv_file)  # Assurez-vous que cette méthode fonctionne correctement
         self.extracted_text = text
 
+        # Vérifie si le texte et les mots-clés sont disponibles
         if not text or not keywords:
-            _logger.warning("No text (%s chars) or no keywords (%s) for CV %s", len(text), len(keywords), self.id)
+            _logger.warning("No text (%s chars) or no keywords (%s) for CV %s", len(text) if text else 0, len(keywords),
+                            self.id)
             return 0.0
 
-        _logger.info("Keywords: %s", keywords)
-        match_count = sum(1 for keyword in keywords if keyword in text)
-        score = (match_count / len(keywords)) * 100 if keywords else 0
-        _logger.info("ATS score: %s (matched: %s, total: %s)", score, match_count, len(keywords))
+        _logger.info("Keywords with weights: %s", keywords)
 
-        # Alternative weighted scoring (uncomment to use):
-        """
-        keywords_with_weights = [(k.name.lower(), k.weight) for k in self.job_id.keyword_ids] + \
-                              [(s.name.lower(), s.weight) for s in self.job_id.skill_ids] + \
-                              [(e.name.lower(), e.weight) for e in self.job_id.experience_ids]
-        total_weight = sum(weight for _, weight in keywords_with_weights)
-        matched_weight = sum(weight for keyword, weight in keywords_with_weights if keyword in text)
+        # Calcul du score pondéré
+        total_weight = 0
+        matched_weight = 0
+
+        # Parcourt tous les mots-clés avec leurs poids
+        for keyword, weight in keywords:
+            # Si le mot-clé est trouvé dans le texte, on ajoute son poids
+            if keyword in text:
+                matched_weight += weight  # Ajouter le poids du mot-clé à la correspondance
+            total_weight += weight  # Ajouter le poids du mot-clé au total
+
+        # Calcul du score pondéré
         score = (matched_weight / total_weight) * 100 if total_weight > 0 else 0
-        _logger.info("Weighted ATS score: %s (matched weight: %s, total weight: %s)", score, matched_weight, total_weight)
-        """
+        _logger.info("Weighted ATS score: %s (matched weight: %s, total weight: %s)", score, matched_weight,
+                     total_weight)
 
         return round(score, 2)
+
 
 class EmployeeMaterial(models.Model):
     _name = 'employee.material'
