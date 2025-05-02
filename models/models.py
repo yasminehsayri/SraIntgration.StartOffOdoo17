@@ -68,7 +68,7 @@ class HrJob(models.Model):
     experience_ids = fields.One2many('hr.job.experience', 'job_id', string="Expériences pondérées")
     keyword_ids = fields.One2many('hr.job.keyword', 'job_id', string="Mots-clés pondérés")
     skill_ids = fields.One2many('hr.job.skill', 'job_id', string="Compétences pondérées")
-    candidate_cv_ids = fields.One2many('hr.candidate.cv', 'job_id', string="Candidate CVs")
+
 
     def _get_keywords(self):
         """Extract job keywords from weighted fields and custom fields."""

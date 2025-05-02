@@ -107,44 +107,102 @@
     <menuitem id="menu_hr_access" name="Accès" parent="menu_hr_materials_access" action="employee_access_action"/>
 
     <!-- hr.job view -->
-    <record id="view_hr_job_form_inherit" model="ir.ui.view">
-        <field name="name">hr.job.form.inherit</field>
-        <field name="model">hr.job</field>
-        <field name="inherit_id" ref="hr_recruitment.view_hr_job_form"/>
-        <field name="arch" type="xml">
-            <!-- Add weighted fields after Critère de recherche -->
-            <xpath expr="//group[@string='Critère de recherche']" position="after">
-                <group string="Weighted Criteria">
-                    <field name="keyword_ids" widget="one2many_list">
-                        <tree editable="bottom">
-                            <field name="name"/>
-                            <field name="weight"/>
-                        </tree>
-                    </field>
-                    <field name="skill_ids" widget="one2many_list">
-                        <tree editable="bottom">
-                            <field name="name"/>
-                            <field name="weight"/>
-                        </tree>
-                    </field>
-                    <field name="experience_ids" widget="one2many_list">
-                        <tree editable="bottom">
-                            <field name="name"/>
-                            <field name="weight"/>
-                        </tree>
-                    </field>
-                    <field name="candidate_cv_ids" widget="one2many_list">
-                        <tree>
-                            <field name="name"/>
-                            <field name="cv_filename"/>
-                            <field name="ats_score"/>
-                            <field name="application_date"/>
-                        </tree>
-                    </field>
-                </group>
-            </xpath>
-        </field>
-    </record>
+ <!-- ========== Vues pour les compétences pondérées ========== -->
+<record id="view_hr_job_skill_tree" model="ir.ui.view">
+    <field name="name">hr.job.skill.tree</field>
+    <field name="model">hr.job.skill</field>
+    <field name="arch" type="xml">
+        <tree>
+            <field name="name"/>
+            <field name="weight"/>
+            <field name="job_id"/>
+        </tree>
+    </field>
+</record>
+
+<record id="view_hr_job_skill_form" model="ir.ui.view">
+    <field name="name">hr.job.skill.form</field>
+    <field name="model">hr.job.skill</field>
+    <field name="arch" type="xml">
+        <form>
+            <group>
+                <field name="job_id"/>
+                <field name="name"/>
+                <field name="weight"/>
+            </group>
+        </form>
+    </field>
+</record>
+
+<!-- ========== Vues pour les mots-clés pondérés ========== -->
+<record id="view_hr_job_keyword_tree" model="ir.ui.view">
+    <field name="name">hr.job.keyword.tree</field>
+    <field name="model">hr.job.keyword</field>
+    <field name="arch" type="xml">
+        <tree>
+            <field name="name"/>
+            <field name="weight"/>
+            <field name="job_id"/>
+        </tree>
+    </field>
+</record>
+
+<record id="view_hr_job_keyword_form" model="ir.ui.view">
+    <field name="name">hr.job.keyword.form</field>
+    <field name="model">hr.job.keyword</field>
+    <field name="arch" type="xml">
+        <form>
+            <group>
+                <field name="job_id"/>
+                <field name="name"/>
+                <field name="weight"/>
+            </group>
+        </form>
+    </field>
+</record>
+
+<!-- ========== Vues pour les expériences pondérées ========== -->
+<record id="view_hr_job_experience_tree" model="ir.ui.view">
+    <field name="name">hr.job.experience.tree</field>
+    <field name="model">hr.job.experience</field>
+    <field name="arch" type="xml">
+        <tree>
+            <field name="name"/>
+            <field name="weight"/>
+            <field name="job_id"/>
+        </tree>
+    </field>
+</record>
+
+<record id="view_hr_job_experience_form" model="ir.ui.view">
+    <field name="name">hr.job.experience.form</field>
+    <field name="model">hr.job.experience</field>
+    <field name="arch" type="xml">
+        <form>
+            <group>
+                <field name="job_id"/>
+                <field name="name"/>
+                <field name="weight"/>
+            </group>
+        </form>
+    </field>
+</record>
+
+<record id="view_hr_job_form_inherit_weighted_fields" model="ir.ui.view">
+    <field name="name">hr.job.form.inherit.weighted.fields</field>
+    <field name="model">hr.job</field>
+    <field name="inherit_id" ref="hr_recruitment.hr_job_simple_form"/>
+    <field name="arch" type="xml">
+        <!-- Ajouter un groupe après un groupe spécifique -->
+         <xpath expr="//group" position="inside">
+            <group string="Exigences pondérées">
+                <field name="experience_ids"/>
+                <field name="keyword_ids"/>
+                <field name="skill_ids"/>
+            </group>
+        </xpath>
+    </field>
+</record>
 
     <!-- hr.candidate.cv views -->
     <record id="view_hr_candidate_cv_tree" model="ir.ui.view">
