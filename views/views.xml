@@ -197,7 +197,7 @@
         <xpath expr="//group" position="inside">
             <group string="Exigences pondérées">
                 <!-- Expériences pondérées -->
-                <field name="experience_ids" widget="selection">
+                <field name="experience_ids" widget="many2one">
                     <tree editable="bottom">
                         <field name="name"/>
                         <field name="weight"/>
@@ -211,7 +211,7 @@
                 </field>
 
                 <!-- Mots-clés pondérés -->
-                <field name="keyword_ids" widget="selection">
+                <field name="keyword_ids" widget="many2one">
                     <tree editable="bottom">
                         <field name="name"/>
                         <field name="weight"/>
@@ -225,7 +225,7 @@
                 </field>
 
                 <!-- Compétences pondérées -->
-                <field name="skill_ids" widget="selection">
+                <field name="skill_ids" widget="many2one">
                     <tree editable="bottom">
                         <field name="name"/>
                         <field name="weight"/>
