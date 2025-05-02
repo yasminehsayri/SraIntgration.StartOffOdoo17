@@ -107,14 +107,13 @@
     <menuitem id="menu_hr_access" name="Accès" parent="menu_hr_materials_access" action="employee_access_action"/>
 
     <!-- hr.job view -->
- <!-- Inherit hr.job form view -->
-<record id="view_hr_job_form_inherit" model="ir.ui.view">
+    <record id="view_hr_job_form_inherit" model="ir.ui.view">
         <field name="name">hr.job.form.inherit</field>
         <field name="model">hr.job</field>
         <field name="inherit_id" ref="hr_recruitment.view_hr_job_form"/>
         <field name="arch" type="xml">
-            <!-- Add weighted fields inside the sheet -->
-            <xpath expr="//sheet" position="inside">
+            <!-- Add weighted fields after Critère de recherche -->
+            <xpath expr="//group[@string='Critère de recherche']" position="after">
                 <group string="Weighted Criteria">
                     <field name="keyword_ids" widget="one2many_list">
                         <tree editable="bottom">
@@ -170,8 +169,8 @@
             <form>
                 <sheet>
                     <group>
-                        <field name="name" widget="many2one"/>
-                        <field name="job_id" widget="many2one"/>
+                        <field name="name"/>
+                        <field name="job_id"/>
                         <field name="cv_file" filename="cv_filename"/>
                         <field name="application_date"/>
                         <field name="departement"/>

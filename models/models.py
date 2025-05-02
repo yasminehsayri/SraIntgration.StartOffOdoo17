@@ -21,6 +21,23 @@ class OnboardingOffboarding(models.Model):
     type = fields.Selection([('onboarding', 'Onboarding'), ('offboarding', 'Offboarding')], string="Type", required=True)
     start_date = fields.Date(string="Date de début", default=fields.Date.today)
     state = fields.Selection([('draft', 'Brouillon'), ('in_progress', 'En cours'), ('done', 'Terminé')], string="État", default='draft')
+
+class HrEmployee(models.Model):
+    _inherit = 'hr.employee'
+
+    birthday = fields.Date(string="Date de naissance")
+    age = fields.Integer(string="Age", compute="_compute_age", store=True)
+    material_ids = fields.One2many('employee.material', 'employee_id', string="Materials")
+    access_ids = fields.One2many('employee.access', 'employee_id', string="Access")
+
+    @api.depends('birthday')
+    def _compute_age(self):
+        for record in self:
+            if record.birthday:
+                record.age = relativedelta(datetime.now().date(), record.birthday).years
+            else:
+                record.age = 0
+
 class HrJobSkill(models.Model):
     _name = 'hr.job.skill'
     _description = "Compétence Pondérée"
@@ -53,30 +70,29 @@ class HrJob(models.Model):
     skill_ids = fields.One2many('hr.job.skill', 'job_id', string="Compétences pondérées")
     candidate_cv_ids = fields.One2many('hr.candidate.cv', 'job_id', string="Candidate CVs")
 
-class HrEmployee(models.Model):
-    _inherit = 'hr.employee'
-
-    birthday = fields.Date(string="Date de naissance")
-    age = fields.Integer(string="Age", compute="_compute_age", store=True)
-    material_ids = fields.One2many('employee.material', 'employee_id', string="Materials")
-    access_ids = fields.One2many('employee.access', 'employee_id', string="Access")
-
-    @api.depends('birthday')
-    def _compute_age(self):
-        for record in self:
-            if record.birthday:
-                record.age = relativedelta(datetime.now().date(), record.birthday).years
-            else:
-                record.age = 0
-
-
     def _get_keywords(self):
-        """Centralized method to extract job keywords."""
-        job_keywords = self.key_words or ""
-        job_experience = self.experience or ""
-        job_skills = self.skills or ""
-        combined_criteria = f"{job_keywords} {job_experience} {job_skills}".lower()
-        return list(set(combined_criteria.replace(",", " ").split()))
+        """Extract job keywords from weighted fields and custom fields."""
+        keywords = []
+        # Use weighted fields from One2many relations
+        for keyword in self.keyword_ids:
+            keywords.append(keyword.name.lower())
+        for skill in self.skill_ids:
+            keywords.append(skill.name.lower())
+        for experience in self.experience_ids:
+            keywords.append(experience.name.lower())
+        # Fallback to custom fields if defined (from parent view)
+        try:
+            if self.key_words:
+                keywords.extend(self.key_words.lower().replace(",", " ").split())
+            if self.experience:
+                keywords.extend(self.experience.lower().replace(",", " ").split())
+            if self.skills:
+                keywords.extend(self.skills.lower().replace(",", " ").split())
+        except AttributeError:
+            _logger.warning("Custom fields key_words, experience, or skills not defined in hr.job")
+        keywords = list(set(keywords))
+        _logger.info("Extracted keywords for job %s: %s", self.name, keywords)
+        return keywords
 
 class HrApplicant(models.Model):
     _inherit = 'hr.applicant'
@@ -87,34 +103,61 @@ class HrApplicant(models.Model):
 
     def _process_cv_and_score(self):
         """Shared method to process CV and calculate ATS score."""
+        _logger.info("Processing CV for applicant %s, job %s, filename %s", self.id, self.job_id.name if self.job_id else "None", self.cv_filename)
         if self.cv_file and self.job_id:
-            cv_record = self.env['hr.candidate.cv'].create({
-                'name': self.id,
-                'job_id': self.job_id.id,
-                'cv_file': self.cv_file,
-                'cv_filename': self.cv_filename or "cv.pdf",
-                'departement': self.department_id.name if self.department_id else "Non spécifié",
-            })
+            try:
+                cv_content = base64.b64decode(self.cv_file)
+                _logger.info("CV file decoded, size: %s bytes", len(cv_content))
+            except Exception as e:
+                _logger.error("Failed to decode CV file for applicant %s: %s", self.id, str(e))
+                self.ats_score = 0.0
+                return
+            cv_record = self.env['hr.candidate.cv'].sudo().search(
+                [('name', '=', self.id), ('job_id', '=', self.job_id.id)],
+                limit=1
+            )
+            if not cv_record:
+                _logger.info("Creating new hr.candidate.cv for applicant %s", self.id)
+                cv_record = self.env['hr.candidate.cv'].sudo().create({
+                    'name': self.id,
+                    'job_id': self.job_id.id,
+                    'cv_file': self.cv_file,
+                    'cv_filename': self.cv_filename or "cv.pdf",
+                    'departement': self.department_id.name if self.department_id else "Non spécifié",
+                })
+            else:
+                _logger.info("Updating existing hr.candidate.cv %s", cv_record.id)
+                cv_record.write({
+                    'cv_file': self.cv_file,
+                    'cv_filename': self.cv_filename or "cv.pdf",
+                    'departement': self.department_id.name if self.department_id else "Non spécifié",
+                })
             score = cv_record._calculate_ats_score()
-            cv_record.ats_score = score
-            self.ats_score = score
+            cv_record.write({'ats_score': score})
+            self.write({'ats_score': score})
+            _logger.info("ATS score set to %s for applicant %s and CV %s", score, self.id, cv_record.id)
         else:
             self.ats_score = 0.0
+            _logger.warning("No CV or job for applicant %s (cv_file: %s, job_id: %s)",
+                           self.id, bool(self.cv_file), self.job_id.id if self.job_id else "None")
 
     @api.model
     def create(self, vals):
+        _logger.info("Creating hr.applicant with vals: %s", vals)
         applicant = super(HrApplicant, self).create(vals)
         applicant._process_cv_and_score()
         return applicant
 
     @api.onchange('cv_file', 'job_id')
     def _onchange_cv_file(self):
+        _logger.info("Onchange triggered for cv_file or job_id on applicant %s", self.id)
         self._process_cv_and_score()
 
 class WebsiteHrRecruitmentCustom(WebsiteHrRecruitment):
     @http.route(['/jobs/apply/<model("hr.job"):job>'], type='http', auth="public", website=True, sitemap=True)
     def jobs_apply(self, job, **kwargs):
         _logger.info("Custom jobs_apply called for job: %s", job.name)
+        _logger.info("Job keywords: %s", job._get_keywords())
         result = super(WebsiteHrRecruitmentCustom, self).jobs_apply(job, **kwargs)
 
         if request.httprequest.method == 'POST':
@@ -128,23 +171,27 @@ class WebsiteHrRecruitmentCustom(WebsiteHrRecruitment):
 
                     cv_content = cv_file.read()
                     cv_filename = cv_file.filename
-
-                    # Rechercher la candidature par email ou autres critères uniques
                     email = request.params.get('email')
                     applicant = request.env['hr.applicant'].sudo().search(
                         [('job_id', '=', job.id), ('email_from', '=', email)],
                         order='id desc', limit=1
                     )
-                    if applicant:
+                    if not applicant:
+                        _logger.info("No applicant found, creating new for job %s, email %s", job.id, email)
+                        applicant = request.env['hr.applicant'].sudo().create({
+                            'job_id': job.id,
+                            'email_from': email,
+                            'name': request.params.get('name', 'New Applicant'),
+                            'cv_file': base64.b64encode(cv_content),
+                            'cv_filename': cv_filename,
+                        })
+                    else:
                         _logger.info("Updating applicant %s with CV: %s", applicant.id, cv_filename)
                         applicant.write({
                             'cv_file': base64.b64encode(cv_content),
                             'cv_filename': cv_filename,
                         })
-                        applicant._process_cv_and_score()
-                    else:
-                        _logger.warning("No applicant found for job %s with email %s", job.id, email)
-                        return request.redirect('/jobs/apply/%s?error=no_applicant' % job.id)
+                    applicant._process_cv_and_score()
                 except Exception as e:
                     _logger.error("Error processing CV file: %s", str(e))
                     return request.redirect('/jobs/apply/%s?error=file_processing' % job.id)
@@ -175,7 +222,7 @@ class CandidateCV(models.Model):
 
     @api.onchange('cv_file')
     def _onchange_cv_file(self):
-        _logger.info("CV file changed for hr.candidate.cv")
+        _logger.info("CV file changed for hr.candidate.cv %s", self.id)
         if self.cv_file:
             self.ats_score = self._calculate_ats_score()
         else:
@@ -186,12 +233,15 @@ class CandidateCV(models.Model):
         text = ""
         if binary_data:
             try:
-                pdf_file = io.BytesIO(base64.b64decode(binary_data))
+                cv_content = base64.b64decode(binary_data)
+                _logger.info("PDF binary data size: %s bytes", len(cv_content))
+                pdf_file = io.BytesIO(cv_content)
                 reader = PyPDF2.PdfReader(pdf_file)
                 for page in reader.pages:
                     page_text = page.extract_text()
                     if page_text:
                         text += page_text + "\n"
+                _logger.info("Extracted text sample: %s", text[:200])
             except Exception as e:
                 _logger.error("Failed to extract text from PDF: %s", str(e))
                 text = ""
@@ -200,22 +250,35 @@ class CandidateCV(models.Model):
 
     def _calculate_ats_score(self):
         """Calculate ATS score based on job keywords and CV text."""
+        _logger.info("Calculating ATS score for CV %s, job %s", self.id, self.job_id.name)
         if not self.job_id or not self.cv_file:
-            _logger.warning("Missing job_id or cv_file for ATS score calculation")
+            _logger.warning("Missing job_id or cv_file for CV %s", self.id)
             return 0.0
 
         keywords = self.job_id._get_keywords()
         text = self._extract_text_from_pdf(self.cv_file)
-        self.extracted_text = text  # Store extracted text
+        self.extracted_text = text
 
         if not text or not keywords:
-            _logger.warning("No text extracted or no keywords available")
+            _logger.warning("No text (%s chars) or no keywords (%s) for CV %s", len(text), len(keywords), self.id)
             return 0.0
 
         _logger.info("Keywords: %s", keywords)
         match_count = sum(1 for keyword in keywords if keyword in text)
         score = (match_count / len(keywords)) * 100 if keywords else 0
-        _logger.info("ATS score calculated: %s", score)
+        _logger.info("ATS score: %s (matched: %s, total: %s)", score, match_count, len(keywords))
+
+        # Alternative weighted scoring (uncomment to use):
+        """
+        keywords_with_weights = [(k.name.lower(), k.weight) for k in self.job_id.keyword_ids] + \
+                              [(s.name.lower(), s.weight) for s in self.job_id.skill_ids] + \
+                              [(e.name.lower(), e.weight) for e in self.job_id.experience_ids]
+        total_weight = sum(weight for _, weight in keywords_with_weights)
+        matched_weight = sum(weight for keyword, weight in keywords_with_weights if keyword in text)
+        score = (matched_weight / total_weight) * 100 if total_weight > 0 else 0
+        _logger.info("Weighted ATS score: %s (matched weight: %s, total weight: %s)", score, matched_weight, total_weight)
+        """
+
         return round(score, 2)
 
 class EmployeeMaterial(models.Model):
