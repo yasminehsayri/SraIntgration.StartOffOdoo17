@@ -21,6 +21,37 @@ class OnboardingOffboarding(models.Model):
     type = fields.Selection([('onboarding', 'Onboarding'), ('offboarding', 'Offboarding')], string="Type", required=True)
     start_date = fields.Date(string="Date de début", default=fields.Date.today)
     state = fields.Selection([('draft', 'Brouillon'), ('in_progress', 'En cours'), ('done', 'Terminé')], string="État", default='draft')
+class HrJobSkill(models.Model):
+    _name = 'hr.job.skill'
+    _description = "Compétence Pondérée"
+
+    name = fields.Char(string="Compétence", required=True)
+    weight = fields.Integer(string="Poids", default=1)
+    job_id = fields.Many2one('hr.job', string="Offre d'emploi", required=True, ondelete='cascade')
+
+class HrJobExperience(models.Model):
+    _name = 'hr.job.experience'
+    _description = "Expérience Pondérée"
+
+    name = fields.Char(string="Expérience", required=True)
+    weight = fields.Integer(string="Poids", default=1)
+    job_id = fields.Many2one('hr.job', string="Offre d'emploi", required=True, ondelete='cascade')
+
+class HrJobKeyword(models.Model):
+    _name = 'hr.job.keyword'
+    _description = "Mot-clé Pondéré"
+
+    name = fields.Char(string="Mot-clé", required=True)
+    weight = fields.Integer(string="Poids", default=1)
+    job_id = fields.Many2one('hr.job', string="Offre d'emploi", required=True, ondelete='cascade')
+
+class HrJob(models.Model):
+    _inherit = 'hr.job'
+
+    experience_ids = fields.One2many('hr.job.experience', 'job_id', string="Expériences pondérées")
+    keyword_ids = fields.One2many('hr.job.keyword', 'job_id', string="Mots-clés pondérés")
+    skill_ids = fields.One2many('hr.job.skill', 'job_id', string="Compétences pondérées")
+    candidate_cv_ids = fields.One2many('hr.candidate.cv', 'job_id', string="Candidate CVs")
 
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
@@ -38,12 +69,6 @@ class HrEmployee(models.Model):
             else:
                 record.age = 0
 
-class HrJob(models.Model):
-    _inherit = 'hr.job'
-
-    experience = fields.Text(string="Expérience")
-    key_words = fields.Text(string="Mots Clés")
-    skills = fields.Text(string="Compétences")
 
     def _get_keywords(self):
         """Centralized method to extract job keywords."""
@@ -60,25 +85,9 @@ class HrApplicant(models.Model):
     cv_filename = fields.Char(string="Nom du fichier CV")
     ats_score = fields.Float(string="Score ATS", store=True)
 
-    def _validate_cv_file(self, cv_content, filename):
-        """Validate CV file for size and type."""
-        if not cv_content:
-            return False
-        if len(cv_content) > 10 * 1024 * 1024:  # 10 MB limit
-            _logger.warning("File size exceeds 10 MB: %s", filename)
-            return False
-        mime_type, _ = mimetypes.guess_type(filename)
-        if mime_type != 'application/pdf':
-            _logger.warning("Invalid file type: %s", filename)
-            return False
-        return True
-
     def _process_cv_and_score(self):
         """Shared method to process CV and calculate ATS score."""
         if self.cv_file and self.job_id:
-            if not self._validate_cv_file(base64.b64decode(self.cv_file), self.cv_filename):
-                self.ats_score = 0.0
-                return
             cv_record = self.env['hr.candidate.cv'].create({
                 'name': self.id,
                 'job_id': self.job_id.id,
