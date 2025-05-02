@@ -140,9 +140,9 @@
     <field name="model">hr.job.keyword</field>
     <field name="arch" type="xml">
         <tree>
+            <field name="job_id"/>
             <field name="name"/>
             <field name="weight"/>
-            <field name="job_id"/>
         </tree>
     </field>
 </record>
@@ -167,9 +167,9 @@
     <field name="model">hr.job.experience</field>
     <field name="arch" type="xml">
         <tree>
+            <field name="job_id"/>
             <field name="name"/>
             <field name="weight"/>
-            <field name="job_id"/>
         </tree>
     </field>
 </record>
@@ -197,7 +197,7 @@
         <xpath expr="//group" position="inside">
             <group string="Exigences pondérées">
                 <!-- Expériences pondérées -->
-                <field name="experience_ids" widget="many2one">
+                <field name="experience_ids" widget="one2many">
                     <tree editable="bottom">
                         <field name="name"/>
                         <field name="weight"/>
@@ -211,7 +211,7 @@
                 </field>
 
                 <!-- Mots-clés pondérés -->
-                <field name="keyword_ids" widget="many2one">
+                <field name="keyword_ids" widget="one2many">
                     <tree editable="bottom">
                         <field name="name"/>
                         <field name="weight"/>
@@ -225,7 +225,7 @@
                 </field>
 
                 <!-- Compétences pondérées -->
-                <field name="skill_ids" widget="many2one">
+                <field name="skill_ids" widget="one2many">
                     <tree editable="bottom">
                         <field name="name"/>
                         <field name="weight"/>

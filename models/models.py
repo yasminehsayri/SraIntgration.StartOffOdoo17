@@ -65,9 +65,9 @@ class HrJobKeyword(models.Model):
 class HrJob(models.Model):
     _inherit = 'hr.job'
 
-    experience_ids = fields.Many2one('hr.job.experience', string="Expériences pondérées")
-    keyword_ids = fields.Many2one('hr.job.keyword', string="Mots-clés pondérés")
-    skill_ids = fields.Many2one('hr.job.skill', string="Compétences pondérées")
+    experience_ids = fields.One2many('hr.job.experience','job_id', string="Expériences pondérées")
+    keyword_ids = fields.One2many('hr.job.keyword','job_id', string="Mots-clés pondérés")
+    skill_ids = fields.One2many('hr.job.skill','job_id', string="Compétences pondérées")
 
 
     def _get_keywords(self):
