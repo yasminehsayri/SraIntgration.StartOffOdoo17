@@ -194,11 +194,49 @@
     <field name="inherit_id" ref="hr_recruitment.hr_job_simple_form"/>
     <field name="arch" type="xml">
         <!-- Ajouter un groupe après un groupe spécifique -->
-         <xpath expr="//group" position="inside">
+        <xpath expr="//group" position="inside">
             <group string="Exigences pondérées">
-                <field name="experience_ids"/>
-                <field name="keyword_ids"/>
-                <field name="skill_ids"/>
+                <!-- Expériences pondérées -->
+                <field name="experience_ids" widget="selection">
+                    <tree editable="bottom">
+                        <field name="name"/>
+                        <field name="weight"/>
+                    </tree>
+                    <form string="Expérience pondérée">
+                        <group>
+                            <field name="name"/>
+                            <field name="weight"/>
+                        </group>
+                    </form>
+                </field>
+
+                <!-- Mots-clés pondérés -->
+                <field name="keyword_ids" widget="selection">
+                    <tree editable="bottom">
+                        <field name="name"/>
+                        <field name="weight"/>
+                    </tree>
+                    <form string="Mot-clé pondéré">
+                        <group>
+                            <field name="name"/>
+                            <field name="weight"/>
+                        </group>
+                    </form>
+                </field>
+
+                <!-- Compétences pondérées -->
+                <field name="skill_ids" widget="selection">
+                    <tree editable="bottom">
+                        <field name="name"/>
+                        <field name="weight"/>
+                    </tree>
+                    <form string="Compétence pondérée">
+                        <group>
+                            <field name="name"/>
+                            <field name="weight"/>
+                        </group>
+                    </form>
+                </field>
             </group>
         </xpath>
     </field>

@@ -3,3 +3,8 @@ access_onboarding_offboarding,onboarding_offboarding,model_onboarding_offboardin
 access_hr_candidate_cv,hr.candidate.cv,model_hr_candidate_cv,base.group_user,1,1,1,1
 
 access_employee_material,employee.material,model_employee_material,base.group_user,1,1,1,1
+access_hr_job,hr.job,model_hr_job,base.group_user,1,1,1,1
+access_hr_job_skill,hr.job.skill,model_hr_job_skill,base.group_user,1,1,1,1
+access_hr_job_keyword,hr.job.keyword,model_hr_job_keyword,base.group_user,1,1,1,1
+access_hr_job_experience,hr.job.experience,model_hr_job_experience,base.group_user,1,1,1,1
+access_hr_applicant,hr.applicant,model_hr_applicant,base.group_user,1,1,1,1
