@@ -12,6 +12,7 @@ import requests
 import os
 import mimetypes
 from transformers import pipeline
+import re
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -238,10 +239,16 @@ class CandidateCV(models.Model):
         headers = {
             "Authorization": f"Bearer {os.getenv('HF_API_TOKEN')}"
         }
-
+        _logger.error("Clé API Hugging Face okk.")
         for record in self:
             if record.extracted_text:
+
+
                 try:
+                    # Limiter à 1024 caractères pour éviter les erreurs de token
+                    cv_text = record.extracted_text[:1024]
+                    _logger.info("Texte extrait du CV : %s", cv_text)
+                    # Prompt ciblé en français
                     prompt = (
                             "Tu es un assistant RH. Résume ce CV en minumum, chaque ligne commençant par un tiret (-). "
                             "Sépare chaque ligne avec un retour à la ligne. Résume les points suivants : "
@@ -259,6 +266,7 @@ class CandidateCV(models.Model):
                     }
 
                     response = requests.post(api_url, headers=headers, json=data)
+                    _logger.info("Réponse API Hugging Face : %s", response.json())
 
                     if response.status_code == 200:
                         result = response.json()
@@ -269,7 +277,7 @@ class CandidateCV(models.Model):
                         record.resume_summary = f"[Error {response.status_code}]"
 
                 except Exception as e:
-                    _logger.error("Exception during CV summary generation: %s", str(e))
+                    _logger.exception("Exception during CV summary generation: %s", str(e))
                     record.resume_summary = "[Processing Error]"
     @api.model
     def create(self, vals):
@@ -305,6 +313,20 @@ class CandidateCV(models.Model):
                 _logger.error("Failed to extract text from PDF: %s", str(e))
                 text = ""
         _logger.info("Extracted text length: %s", len(text))
+        # Remplacer les espaces entre lettres (ex: 'b a c c a l a u r é a t')
+        text = re.sub(r'\b([a-zA-Z])\s+([a-zA-Z])\b', r'\1\2', text)
+        # Enlever les chiffres suivis d'espaces (par exemple, '20xx' ou '00000')
+        text = re.sub(r'\d\s+', '', text)
+        # Remplacer les mots coupés trop souvent
+        text = re.sub(r'\d\s+', '', text)
+        text = re.sub(r'\b[\w.-]+@[\w.-]+\.[a-z]{2,}\b', '', text)  # Enlever les emails
+        text = re.sub(r'http[s]?://[^\s]+', '', text)  # Enlever les URLs
+        text = re.sub(r'\d{10,}', '', text)  # Enlever les numéros de téléphone (longs)
+        # Remplacer les mots coupés trop fréquemment (ex: 'pr é no mn om' => 'prénom nom')
+        text = re.sub(r'\b([a-zA-Z]+)\s+([a-zA-Z]+)\b', r'\1\2', text)
+        # Remplacer les séquences d'espaces multiples par un seul espace
+        text = re.sub(r'\s+', ' ', text)
+        text = text.strip()
         return text.lower()
 
     def _calculate_ats_score(self):
