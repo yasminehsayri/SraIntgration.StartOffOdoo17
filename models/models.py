@@ -234,8 +234,7 @@ class CandidateCV(models.Model):
     resume_summary = fields.Text(string="Résumé du CV", readonly=True)
 
     def generate_cv_summary(self):
-        # Use the Hugging Face summarization pipeline
-        api_url = "https://api-inference.huggingface.co/pipeline/summarization/facebook/bart-large-cnn"
+        api_url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3"
         headers = {
             "Authorization": f"Bearer {os.getenv('HF_API_TOKEN')}"
         }
@@ -243,15 +242,19 @@ class CandidateCV(models.Model):
         for record in self:
             if record.extracted_text:
                 try:
-                    # Limit input to avoid token limits
-                    text = record.extracted_text[:1024]  # Max length supported by many summarization models
+                    prompt = (
+                            "Tu es un assistant RH. Résume ce CV en minumum, chaque ligne commençant par un tiret (-). "
+                            "Sépare chaque ligne avec un retour à la ligne. Résume les points suivants : "
+                            "expériences, compétences, diplômes, domaines d'expertise.\n\n"
+                            "Voici un résumé de CV à traiter :\n"
+                            + record.extracted_text
+                    )
 
                     data = {
-                        "inputs": text,
+                        "inputs": prompt,
                         "parameters": {
-                            "max_length": 150,
-                            "min_length": 50,
-                            "do_sample": False
+                            "temperature": 0.3,
+                            "max_new_tokens": 200
                         }
                     }
 
@@ -259,7 +262,7 @@ class CandidateCV(models.Model):
 
                     if response.status_code == 200:
                         result = response.json()
-                        summary = result[0].get("summary_text", "").strip()
+                        summary = result[0]["generated_text"].split("CV:")[-1].strip()
                         record.resume_summary = summary
                     else:
                         _logger.error("Hugging Face Error: %s - %s", response.status_code, response.text)
@@ -268,7 +271,6 @@ class CandidateCV(models.Model):
                 except Exception as e:
                     _logger.error("Exception during CV summary generation: %s", str(e))
                     record.resume_summary = "[Processing Error]"
-
     @api.model
     def create(self, vals):
         _logger.info("Creating hr.candidate.cv with vals: %s", vals)
