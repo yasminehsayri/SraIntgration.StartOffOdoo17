@@ -254,6 +254,8 @@
                 <field name="departement"/>
                 <field name="application_date"/>
                 <field name="ats_score"/>
+                <field name="resume_summary"/>
+                <button name="generate_cv_summary" type="object" string="Générer Résumé" class="oe_highlight"/>
             </tree>
         </field>
     </record>
@@ -272,6 +274,8 @@
                         <field name="departement"/>
                         <field name="ats_score"/>
                         <field name="extracted_text" widget="text" readonly="1"/>
+                        <field name="resume_summary" widget="text" readonly="1"/>
+                        <button name="generate_cv_summary" type="object" string="Générer Résumé" class="oe_highlight"/>
                     </group>
                 </sheet>
             </form>
