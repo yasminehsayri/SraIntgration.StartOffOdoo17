@@ -261,45 +261,74 @@ class CandidateCV(models.Model):
         return text.lower()
 
     def _calculate_ats_score(self):
-        """Calculate ATS score based on job keywords and CV text."""
+        """Calculate ATS score based on job keywords and CV text, with section-based weighting."""
         _logger.info("Calculating ATS score for CV %s, job %s", self.id, self.job_id.name)
 
-        # Vérifie que job_id et cv_file existent
         if not self.job_id or not self.cv_file:
             _logger.warning("Missing job_id or cv_file for CV %s", self.id)
             return 0.0
 
-        # Extraction des mots-clés et du texte du CV
-        keywords = self.job_id._get_keywords()  # Cette fonction doit retourner les mots-clés avec leurs poids
-        text = self._extract_text_from_pdf(self.cv_file)  # Assurez-vous que cette méthode fonctionne correctement
+        keywords = self.job_id._get_keywords()
+        text = self._extract_text_from_pdf(self.cv_file)
         self.extracted_text = text
 
-        # Vérifie si le texte et les mots-clés sont disponibles
         if not text or not keywords:
-            _logger.warning("No text (%s chars) or no keywords (%s) for CV %s", len(text) if text else 0, len(keywords),
-                            self.id)
+            _logger.warning("No text (%s chars) or no keywords (%s) for CV %s", len(text), len(keywords), self.id)
             return 0.0
 
-        _logger.info("Keywords with weights: %s", keywords)
+        # Poids par section du CV (modifiable selon ton besoin)
+        section_weights = {
+            'experience': 2.0,
+            'skills': 1.5,
+            'education': 1.0,
+            'others': 0.5
+        }
 
-        # Calcul du score pondéré
-        total_weight = 0
-        matched_weight = 0
+        # Découper le texte du CV en sections par mots-clés
+        sections = {
+            'experience': '',
+            'skills': '',
+            'education': '',
+            'others': ''
+        }
 
-        # Parcourt tous les mots-clés avec leurs poids
+        current_section = 'others'
+        for line in text.split('\n'):
+            line_lower = line.lower()
+            if any(word in line_lower for word in ['expérience', 'experience']):
+                current_section = 'experience'
+            elif any(word in line_lower for word in ['compétence', 'skills']):
+                current_section = 'skills'
+            elif any(word in line_lower for word in ['formation', 'education', 'diplôme']):
+                current_section = 'education'
+            elif line.strip() == '':
+                continue  # Ignore blank lines
+            sections[current_section] += line_lower + ' '
+
+        # Calcul du score avec pondération
+        total_score = 0.0
+        total_weight = 0.0
+
         for keyword, weight in keywords:
-            # Si le mot-clé est trouvé dans le texte, on ajoute son poids
-            if keyword in text:
-                matched_weight += weight  # Ajouter le poids du mot-clé à la correspondance
-            total_weight += weight  # Ajouter le poids du mot-clé au total
+            for section, section_text in sections.items():
+                if keyword in section_text:
+                    score = weight * section_weights.get(section, 1.0)
+                    _logger.info(f"Keyword '{keyword}' found in section '{section}' -> +{score}")
+                    total_score += score
+                    total_weight += section_weights.get(section, 1.0)
 
-        # Calcul du score pondéré
-        score = (matched_weight / total_weight) * 100 if total_weight > 0 else 0
-        _logger.info("Weighted ATS score: %s (matched weight: %s, total weight: %s)", score, matched_weight,
-                     total_weight)
+        # Normalisation (optionnelle)
+        final_score = (total_score / total_weight) * 10 if total_weight > 0 else 0.0
+        _logger.info("Final ATS score for CV %s: %s", self.id, final_score)
+        return round(final_score, 2)
 
-        return round(score, 2)
+    def _get_section_text(self, text, section_name):
+        """Extraire le texte d'une section spécifique du CV."""
+        # Cette méthode est un placeholder pour illustrer. Vous devrez l'implémenter pour extraire du texte en fonction de la section.
+        # Par exemple, rechercher des titres comme "Expérience" ou "Compétences" dans le texte et extraire le contenu sous ces titres.
 
+        # Pour le moment, retournons le texte complet (à adapter selon votre logique de parsing)
+        return text
 
 class EmployeeMaterial(models.Model):
     _name = 'employee.material'
