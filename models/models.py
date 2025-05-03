@@ -12,8 +12,8 @@ import requests
 import os
 import mimetypes
 from transformers import pipeline
-
-
+from dotenv import load_dotenv
+load_dotenv()
 
 
 
