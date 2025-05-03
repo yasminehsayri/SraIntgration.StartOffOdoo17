@@ -112,6 +112,7 @@ class HrApplicant(models.Model):
     cv_file = fields.Binary(string="CV (PDF)")
     cv_filename = fields.Char(string="Nom du fichier CV")
     ats_score = fields.Float(string="Score ATS", store=True)
+    score_detail = fields.Text(string='Score Details')
 
     def _process_cv_and_score(self):
         """Shared method to process CV and calculate ATS score."""
