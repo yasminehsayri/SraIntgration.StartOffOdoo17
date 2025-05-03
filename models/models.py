@@ -8,7 +8,14 @@ from odoo.http import request
 from odoo.addons.website_hr_recruitment.controllers.main import WebsiteHrRecruitment
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+import requests
+import os
 import mimetypes
+from transformers import pipeline
+
+
+
+
 
 _logger = logging.getLogger(__name__)
 
@@ -224,6 +231,43 @@ class CandidateCV(models.Model):
     departement = fields.Char(string="Département", required=True)
     extracted_text = fields.Text(string="Extracted CV Text")
     ats_score = fields.Float(string="Score ATS", store=True)
+    resume_summary = fields.Text(string="Résumé du CV", readonly=True)
+
+    def generate_cv_summary(self):
+        # Use the Hugging Face summarization pipeline
+        api_url = "https://api-inference.huggingface.co/pipeline/summarization/facebook/bart-large-cnn"
+        headers = {
+            "Authorization": f"Bearer {os.getenv('HF_API_TOKEN')}"
+        }
+
+        for record in self:
+            if record.extracted_text:
+                try:
+                    # Limit input to avoid token limits
+                    text = record.extracted_text[:1024]  # Max length supported by many summarization models
+
+                    data = {
+                        "inputs": text,
+                        "parameters": {
+                            "max_length": 150,
+                            "min_length": 50,
+                            "do_sample": False
+                        }
+                    }
+
+                    response = requests.post(api_url, headers=headers, json=data)
+
+                    if response.status_code == 200:
+                        result = response.json()
+                        summary = result[0].get("summary_text", "").strip()
+                        record.resume_summary = summary
+                    else:
+                        _logger.error("Hugging Face Error: %s - %s", response.status_code, response.text)
+                        record.resume_summary = f"[Error {response.status_code}]"
+
+                except Exception as e:
+                    _logger.error("Exception during CV summary generation: %s", str(e))
+                    record.resume_summary = "[Processing Error]"
 
     @api.model
     def create(self, vals):
