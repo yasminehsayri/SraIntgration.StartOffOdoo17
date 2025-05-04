@@ -250,10 +250,10 @@ class CandidateCV(models.Model):
                     _logger.info("Texte extrait du CV : %s", cv_text)
                     # Prompt ciblé en français
                     prompt = (
-                            "Tu es un assistant RH. Résume ce CV en minumum, chaque ligne commençant par un tiret (-). "
-                            "Sépare chaque ligne avec un retour à la ligne. Résume les points suivants : "
-                            "expériences, compétences, diplômes, domaines d'expertise.\n\n"
-                            "Voici un résumé de CV à traiter :\n"
+                            "Résumez le CV suivant en quelques lignes. "
+                            "Mentionnez les expériences clés, les compétences techniques, et les diplômes principaux. "
+                            "Utilisez des phrases courtes et fluides. "
+                            "Voici le texte extrait du CV à résumer :\n"
                             + record.extracted_text
                     )
 
