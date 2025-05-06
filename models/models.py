@@ -180,6 +180,7 @@ class WebsiteHrRecruitmentCustom(WebsiteHrRecruitment):
         _logger.info("Custom jobs_apply called for job: %s", job.name)
         _logger.info("Job keywords: %s", job._get_keywords())
         result = super(WebsiteHrRecruitmentCustom, self).jobs_apply(job, **kwargs)
+        _logger.info("Custom jobs_apply called for job: %s", job)
 
         if request.httprequest.method == 'POST':
             cv_file = request.httprequest.files.get('cv_file') or request.httprequest.files.get('ufile')
@@ -202,7 +203,7 @@ class WebsiteHrRecruitmentCustom(WebsiteHrRecruitment):
                         applicant = request.env['hr.applicant'].sudo().create({
                             'job_id': job.id,
                             'email_from': email,
-                            'name': request.params.get('name', 'New Applicant'),
+                            'name': request.params.get('name'),
                             'cv_file': base64.b64encode(cv_content),
                             'cv_filename': cv_filename,
                         })
@@ -223,7 +224,7 @@ class WebsiteHrRecruitmentCustom(WebsiteHrRecruitment):
 class CandidateCV(models.Model):
     _name = "hr.candidate.cv"
     _description = "CV des candidats"
-
+    applicant_id = fields.Many2one('hr.applicant', string="Candidature")
     name = fields.Many2one('hr.applicant', string="Nom du candidat")
     job_id = fields.Many2one('hr.job', string="Poste visé", required=True, ondelete='cascade')
     cv_file = fields.Binary(string="CV (PDF)")
