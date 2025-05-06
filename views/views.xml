@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <!-- hr.employee view -->
+    <!-- hr.employee view
         <record id="view_hr_employee_form_inherit_materials" model="ir.ui.view">
         <field name="name">hr.employee.form.inherit.materials</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
             <xpath expr="//group//field[@name='work_email']" position="after">
-                <field name="birthday"/>
                 <field name="age" invisible="1"/>
                 <button name="%(employee_material_action)d"
                         type="action"
@@ -21,7 +20,7 @@
                         string="Acces"/>
             </xpath>
         </field>
-    </record>
+    </record> -->
 
     <!-- employee.material views -->
     <record id="employee_material_form" model="ir.ui.view">

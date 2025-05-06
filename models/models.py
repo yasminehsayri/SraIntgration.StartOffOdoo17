@@ -10,8 +10,6 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import requests
 import os
-import mimetypes
-from transformers import pipeline
 import re
 from dotenv import load_dotenv
 load_dotenv()
@@ -25,26 +23,14 @@ class OnboardingOffboarding(models.Model):
     _description = "Onboarding & Offboarding"
 
     name = fields.Char(string="Nom", required=True)
-    employee_id = fields.Many2one('hr.employee', string="Employé", required=True)
-    type = fields.Selection([('onboarding', 'Onboarding'), ('offboarding', 'Offboarding')], string="Type", required=True)
-    start_date = fields.Date(string="Date de début", default=fields.Date.today)
-    state = fields.Selection([('draft', 'Brouillon'), ('in_progress', 'En cours'), ('done', 'Terminé')], string="État", default='draft')
 
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
     birthday = fields.Date(string="Date de naissance")
-    age = fields.Integer(string="Age", compute="_compute_age", store=True)
+    age = fields.Integer(string="Age", store=True)
     material_ids = fields.One2many('employee.material', 'employee_id', string="Materials")
     access_ids = fields.One2many('employee.access', 'employee_id', string="Access")
-
-    @api.depends('birthday')
-    def _compute_age(self):
-        for record in self:
-            if record.birthday:
-                record.age = relativedelta(datetime.now().date(), record.birthday).years
-            else:
-                record.age = 0
 
 class HrJobSkill(models.Model):
     _name = 'hr.job.skill'
@@ -89,23 +75,6 @@ class HrJob(models.Model):
         for experience in self.experience_ids:
             keywords.append((experience.name.lower(), experience.weight))
 
-        # Fallback to custom fields if defined (from parent view)
-        try:
-            if self.key_words:
-                custom_keywords = self.key_words.lower().replace(",", " ").split()
-                for kw in custom_keywords:
-                    keywords.append((kw, 1))  # Default weight for custom keywords
-            if self.experience:
-                custom_experiences = self.experience.lower().replace(",", " ").split()
-                for exp in custom_experiences:
-                    keywords.append((exp, 1))  # Default weight for custom experiences
-            if self.skills:
-                custom_skills = self.skills.lower().replace(",", " ").split()
-                for skill in custom_skills:
-                    keywords.append((skill, 1))  # Default weight for custom skills
-        except AttributeError:
-            _logger.warning("Custom fields key_words, experience, or skills not defined in hr.job")
-
         # Removing duplicates while maintaining the keyword and its associated weight
         keywords = list(set(keywords))
 
@@ -140,7 +109,7 @@ class HrApplicant(models.Model):
             if not cv_record:
                 _logger.info("Creating new hr.candidate.cv for applicant %s", self.id)
                 cv_record = self.env['hr.candidate.cv'].sudo().create({
-                    'name': self.id,
+                    'name': self.partner_name,
                     'job_id': self.job_id.id,
                     'cv_file': self.cv_file,
                     'cv_filename': self.cv_filename or "cv.pdf",
@@ -225,7 +194,7 @@ class CandidateCV(models.Model):
     _name = "hr.candidate.cv"
     _description = "CV des candidats"
     applicant_id = fields.Many2one('hr.applicant', string="Candidature")
-    name = fields.Many2one('hr.applicant', string="Nom du candidat")
+    name = fields.Char( string="Nom du candidat")
     job_id = fields.Many2one('hr.job', string="Poste visé", required=True, ondelete='cascade')
     cv_file = fields.Binary(string="CV (PDF)")
     cv_filename = fields.Char(string="CV du candidat")
