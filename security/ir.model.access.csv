@@ -8,3 +8,4 @@ access_hr_job_skill,hr.job.skill,model_hr_job_skill,base.group_user,1,1,1,1
 access_hr_job_keyword,hr.job.keyword,model_hr_job_keyword,base.group_user,1,1,1,1
 access_hr_job_experience,hr.job.experience,model_hr_job_experience,base.group_user,1,1,1,1
 access_hr_applicant,hr.applicant,model_hr_applicant,base.group_user,1,1,1,1
+access_hr_job_requirement,hr.job.requirement,model_hr_job_requirement,base.group_user,1,1,1,1

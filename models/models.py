@@ -388,3 +388,11 @@ class EmployeeAccess(models.Model):
     description = fields.Text(string='Description')
     start_date = fields.Date(string="Date de début", default=fields.Date.today)
     end_date = fields.Date(string="Date de fin")
+
+class JobRequirement(models.Model):
+    _name = "hr.job.requirement"
+    _description = "Les exigences du poste"
+
+    job_id = fields.Many2one('hr.job', string="Poste", required=True, ondelete='cascade')
+    departement = fields.Char(string="Département", required=True)
+    description = fields.Char(string="Description", required=True)
