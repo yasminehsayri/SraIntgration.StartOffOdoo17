@@ -3,6 +3,7 @@ import base64
 import io
 import PyPDF2
 import logging
+from odoo.exceptions import UserError
 from odoo import http
 from odoo.http import request
 from odoo.addons.website_hr_recruitment.controllers.main import WebsiteHrRecruitment
@@ -393,6 +394,22 @@ class JobRequirement(models.Model):
     _name = "hr.job.requirement"
     _description = "Les exigences du poste"
 
-    job_id = fields.Many2one('hr.job', string="Poste", required=True, ondelete='cascade')
+    job_id = fields.Many2one('hr.job', string="Poste associé", required=True, ondelete='cascade')
     departement = fields.Char(string="Département", required=True)
     description = fields.Char(string="Description", required=True)
+    user_id = fields.Many2one('res.users', 'Responsable RH', default=lambda self: self.env.user)
+    @api.model
+    def create(self, vals):
+        res = super(JobRequirement, self).create(vals)
+
+        # Récupérer l'utilisateur RH
+        rh_user = self.env.ref('hr.group_hr_user').users[0]  # Assurez-vous qu'il y a bien un utilisateur RH assigné
+
+        # Envoyer un e-mail de notification
+        template = self.env.ref('hr_recruitment.email_template_requirement_added')
+        if template:
+            # Passer l'objet à envoyer avec l'email
+            template.sudo().send_mail(res.id, force_send=True)
+        else:
+            raise UserError("Template d'email non trouvé.")
+        return res
