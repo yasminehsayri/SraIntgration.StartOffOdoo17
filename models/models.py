@@ -419,7 +419,7 @@ class InterviewSchedule(models.Model):
     _description = 'Schedule of interviews'
     name = fields.Char(string="Titre de l'entretien", required=True)
     job_id = fields.Many2one('hr.job', string="Poste associé", required=True, ondelete='cascade')
-    candidate_id = fields.Many2one('hr.applicant', string="Candidat", required=True)
+    applicant_id = fields.Many2one('hr.applicant', string="Candidat", required=True)
     interview_date = fields.Datetime(string="Date de l'entretien", required=True)
     hr_id = fields.Many2one('hr.employee', string="RH", required=True)
     manager_id = fields.Many2one('hr.employee', string="Manager", required=True)

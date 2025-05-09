@@ -338,7 +338,7 @@
                     <group>
                         <field name="name"/>
                         <field name="job_id"/>
-                        <field name="candidate_id"/>
+                        <field name="applicant_id" />
                         <field name="interview_date" widget="datetime"/>
                         <field name="hr_id"/>
                         <field name="manager_id"/>
@@ -355,7 +355,7 @@
             <tree>
                         <field name="name"/>
                         <field name="job_id"/>
-                        <field name="candidate_id"/>
+                        <field name="applicant_id" />
                         <field name="interview_date" widget="datetime"/>
                         <field name="hr_id"/>
                         <field name="manager_id"/>
@@ -371,7 +371,7 @@
                   date_start="interview_date"
                   color="hr_id">
             <field name="name"/>
-            <field name="candidate_id"/>
+            <field name="applicant_id"/>
             <field name="job_id"/>
         </calendar>
     </field>
@@ -380,8 +380,8 @@
     <record id="action_interview_schedule" model="ir.actions.act_window">
         <field name="name">Les entretiens</field>
         <field name="res_model">hr.interview.schedule</field>
-        <field name="view_mode">tree,form,calendar</field>
-        <field name="context">{'search_default_applicant_id': context.get('active_id')}</field>
+        <field name="context">{}</field>
+    <field name="domain">[('applicant_id', '=', context.get('default_applicant_id', False))]</field> <!-- Add domain for filtering -->
 
     </record>
         <!-- Menu items for RH and Manager -->
@@ -398,7 +398,7 @@
                     type="action"
                     class="oe_stat_button"
                     icon="fa-calendar"
-                    context="{'default_candidate_id': active_id}"
+                    context="{'default_applicant_id': active_id}"
                     invisible="not id">
 
                 <div class="o_field_widget o_stat_info">
