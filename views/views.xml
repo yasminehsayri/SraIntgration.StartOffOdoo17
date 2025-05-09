@@ -323,6 +323,7 @@
         <field name="name">Les exigences du poste</field>
         <field name="res_model">hr.job.requirement</field>
         <field name="view_mode">tree,form</field>
+
     </record>
 
     <menuitem id="menu_requirement_job" name="Les exigences du poste" parent="hr_recruitment.menu_hr_recruitment_root" action="action_requirement_job"/>
@@ -380,6 +381,8 @@
         <field name="name">Les entretiens</field>
         <field name="res_model">hr.interview.schedule</field>
         <field name="view_mode">tree,form,calendar</field>
+        <field name="context">{'search_default_applicant_id': context.get('active_id')}</field>
+
     </record>
         <!-- Menu items for RH and Manager -->
     <menuitem id="menu_interview_schedule" name="Interview Schedules" parent="hr_recruitment.menu_hr_recruitment_root" action="action_interview_schedule"/>
@@ -395,8 +398,9 @@
                     type="action"
                     class="oe_stat_button"
                     icon="fa-calendar"
-                    context="{'search_default_applicant_id': active_id}"
+                    context="{'default_candidate_id': active_id}"
                     invisible="not id">
+
                 <div class="o_field_widget o_stat_info">
                     <span class="o_stat_text">Entretien</span>
                     <span class="o_stat_value">Voir</span>
