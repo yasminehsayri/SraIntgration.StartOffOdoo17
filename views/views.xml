@@ -393,14 +393,22 @@
 <!-- Menu item for Interview Schedules -->
 <menuitem id="menu_interview_schedule" name="Interview Schedules" parent="hr_recruitment.menu_hr_recruitment_root" action="action_interview_schedule"/>
 
-<!-- Button on Applicant Form View -->
+<!-- Action for Interview Schedule -->
+<record id="action_interview_schedule_applicant" model="ir.actions.act_window">
+    <field name="name">Les entretiens</field>
+    <field name="res_model">hr.interview.schedule</field>
+    <field name="context">{'default_applicant_id': active_id}</field> <!-- Pass the active_id to the context -->
+    <field name="domain">[('applicant_id', '=', active_id)]</field> <!-- Filter by applicant_id -->
+</record>
+
+<!-- Button on Applicant Form View to View Interviews -->
 <record id="view_hr_applicant_form_inherit_calendar_button" model="ir.ui.view">
     <field name="name">hr.applicant.form.inherit.calendar.button</field>
     <field name="model">hr.applicant</field>
     <field name="inherit_id" ref="hr_recruitment.hr_applicant_view_form"/>
     <field name="arch" type="xml">
         <xpath expr="//button[@name='action_makeMeeting']" position="replace">
-            <button name="%(action_interview_schedule)d"
+            <button name="%(action_interview_schedule_applicant)d"
                     type="action"
                     class="oe_stat_button"
                     icon="fa-calendar"
@@ -413,8 +421,6 @@
         </xpath>
     </field>
 </record>
-        <!-- Menu items for RH and Manager -->
-    <menuitem id="menu_interview_schedule" name="Interview Schedules" parent="hr_recruitment.menu_hr_recruitment_root" action="action_interview_schedule"/>
 
     <!-- Interview Feedback Form View -->
     <record id="view_interview_feedback_form" model="ir.ui.view">
