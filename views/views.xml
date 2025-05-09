@@ -328,41 +328,45 @@
 
     <menuitem id="menu_requirement_job" name="Les exigences du poste" parent="hr_recruitment.menu_hr_recruitment_root" action="action_requirement_job"/>
 
-<!-- Interview Schedule Form View -->
-    <record id="view_interview_schedule_form" model="ir.ui.view">
-        <field name="name">interview.schedule.form</field>
-        <field name="model">hr.interview.schedule</field>
-        <field name="arch" type="xml">
-            <form string="calendrier des entretiens">
-                <sheet>
-                    <group>
-                        <field name="name"/>
-                        <field name="job_id"/>
-                        <field name="applicant_id" />
-                        <field name="interview_date" widget="datetime"/>
-                        <field name="hr_id"/>
-                        <field name="manager_id"/>
-                        <field name="state"/>
-                    </group>
-                </sheet>
-            </form>
-        </field>
-    </record>
-        <record id="view_interview_schedule_tree" model="ir.ui.view">
-        <field name="name">interview.schedule.tree</field>
-        <field name="model">hr.interview.schedule</field>
-        <field name="arch" type="xml">
-            <tree>
-                        <field name="name"/>
-                        <field name="job_id"/>
-                        <field name="applicant_id" />
-                        <field name="interview_date" widget="datetime"/>
-                        <field name="hr_id"/>
-                        <field name="manager_id"/>
-                        <field name="state"/>
-            </tree>
-        </field>
-    </record>
+<!-- Form View for Interview Schedule -->
+<record id="view_interview_schedule_form" model="ir.ui.view">
+    <field name="name">interview.schedule.form</field>
+    <field name="model">hr.interview.schedule</field>
+    <field name="arch" type="xml">
+        <form string="Calendrier des entretiens">
+            <sheet>
+                <group>
+                    <field name="name"/>
+                    <field name="job_id"/>
+                    <field name="applicant_id"/>
+                    <field name="interview_date" widget="datetime"/>
+                    <field name="hr_id"/>
+                    <field name="manager_id"/>
+                    <field name="state"/>
+                </group>
+            </sheet>
+        </form>
+    </field>
+</record>
+
+<!-- Tree View for Interview Schedule -->
+<record id="view_interview_schedule_tree" model="ir.ui.view">
+    <field name="name">interview.schedule.tree</field>
+    <field name="model">hr.interview.schedule</field>
+    <field name="arch" type="xml">
+        <tree>
+            <field name="name"/>
+            <field name="job_id"/>
+            <field name="applicant_id"/>
+            <field name="interview_date" widget="datetime"/>
+            <field name="hr_id"/>
+            <field name="manager_id"/>
+            <field name="state"/>
+        </tree>
+    </field>
+</record>
+
+<!-- Calendar View for Interview Schedule -->
 <record id="view_interview_schedule_calendar" model="ir.ui.view">
     <field name="name">interview.schedule.calendar</field>
     <field name="model">hr.interview.schedule</field>
@@ -377,18 +381,20 @@
     </field>
 </record>
 
-    <record id="action_interview_schedule" model="ir.actions.act_window">
-        <field name="name">Les entretiens</field>
-        <field name="res_model">hr.interview.schedule</field>
-        <field name="context">{}</field>
-    <field name="domain">[('applicant_id', '=', context.get('default_applicant_id', False))]</field> <!-- Add domain for filtering -->
+<!-- Action for Interview Schedule -->
+<record id="action_interview_schedule" model="ir.actions.act_window">
+    <field name="name">Les entretiens</field>
+    <field name="res_model">hr.interview.schedule</field>
+    <field name="context">{}</field>
+    <!-- Modify the domain to show all records -->
+    <field name="domain">[]</field> <!-- Remove the filter based on applicant_id -->
+</record>
 
-    </record>
-        <!-- Menu items for RH and Manager -->
-    <menuitem id="menu_interview_schedule" name="Interview Schedules" parent="hr_recruitment.menu_hr_recruitment_root" action="action_interview_schedule"/>
+<!-- Menu item for Interview Schedules -->
+<menuitem id="menu_interview_schedule" name="Interview Schedules" parent="hr_recruitment.menu_hr_recruitment_root" action="action_interview_schedule"/>
 
-
-    <record id="view_hr_applicant_form_inherit_calendar_button" model="ir.ui.view">
+<!-- Button on Applicant Form View -->
+<record id="view_hr_applicant_form_inherit_calendar_button" model="ir.ui.view">
     <field name="name">hr.applicant.form.inherit.calendar.button</field>
     <field name="model">hr.applicant</field>
     <field name="inherit_id" ref="hr_recruitment.hr_applicant_view_form"/>
@@ -398,9 +404,7 @@
                     type="action"
                     class="oe_stat_button"
                     icon="fa-calendar"
-                    context="{'default_applicant_id': active_id}"
                     invisible="not id">
-
                 <div class="o_field_widget o_stat_info">
                     <span class="o_stat_text">Entretien</span>
                     <span class="o_stat_value">Voir</span>
@@ -409,9 +413,8 @@
         </xpath>
     </field>
 </record>
-
-
-
+        <!-- Menu items for RH and Manager -->
+    <menuitem id="menu_interview_schedule" name="Interview Schedules" parent="hr_recruitment.menu_hr_recruitment_root" action="action_interview_schedule"/>
 
     <!-- Interview Feedback Form View -->
     <record id="view_interview_feedback_form" model="ir.ui.view">
