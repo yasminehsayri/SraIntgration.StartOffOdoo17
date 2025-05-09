@@ -413,3 +413,35 @@ class JobRequirement(models.Model):
         else:
             raise UserError("Template d'email non trouvé.")
         return res
+
+class InterviewSchedule(models.Model):
+    _name = 'hr.interview.schedule'
+    _description = 'Schedule of interviews'
+    name = fields.Char(string="Titre de l'entretien", required=True)
+    job_id = fields.Many2one('hr.job', string="Poste associé", required=True, ondelete='cascade')
+    candidate_id = fields.Many2one('hr.applicant', string="Candidat", required=True)
+    interview_date = fields.Datetime(string="Date de l'entretien", required=True)
+    hr_id = fields.Many2one('hr.employee', string="RH", required=True)
+    manager_id = fields.Many2one('hr.employee', string="Manager", required=True)
+    state = fields.Selection([
+        ('scheduled', 'Scheduled'),
+        ('completed', 'Completed'),
+        ('canceled', 'Canceled'),
+    ], string="State", default='scheduled')
+
+
+
+    class InterviewFeedback(models.Model):
+        _name = 'hr.interview.feedback'
+        _description = 'Interview Feedback'
+
+        interview_id = fields.Many2one('hr.interview.schedule', string="Interview", required=True)
+        manager_id = fields.Many2one('hr.employee', string="Manager", required=True)
+        rating = fields.Selection([
+            ('1', 'Poor'),
+            ('2', 'Fair'),
+            ('3', 'Good'),
+            ('4', 'Very Good'),
+            ('5', 'Excellent')
+        ], string="Rating", required=True)
+        remarks = fields.Text(string="Remarks")
