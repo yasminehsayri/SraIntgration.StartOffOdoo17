@@ -427,7 +427,7 @@
     </field>
 </record>
 
-<record id="view_interview_feedback_wizard_form" model="ir.ui.view">
+<record id="view_interview_feedback_wizard_form1" model="ir.ui.view">
     <field name="name">interview.feedback.wizard.form</field>
     <field name="model">interview.feedback.wizard1</field>
     <field name="arch" type="xml">
@@ -435,7 +435,7 @@
             <sheet>
                 <group>
                     <field name="manager_feedback"/>
-
+                    <field name="priority" widget="priority" field_id="priority_0"/>
                 </group>
                 <footer>
                     <button string="Valider" type="object" name="action_submit_feedback" class="btn-primary"/>
@@ -446,7 +446,7 @@
     </field>
 </record>
 
-<record id="view_interview_feedback_wizard_form" model="ir.ui.view">
+<record id="view_interview_feedback_wizard_form2" model="ir.ui.view">
     <field name="name">interview.feedback.wizard.form</field>
     <field name="model">interview.feedback.wizard2</field>
     <field name="arch" type="xml">
@@ -454,6 +454,7 @@
             <sheet>
                 <group>
                     <field name="rh_feedback"/>
+                    <field name="priority" widget="priority" field_id="priority_0"/>
                 </group>
                 <footer>
                     <button string="Valider" type="object" name="action_submit_feedback" class="btn-primary"/>

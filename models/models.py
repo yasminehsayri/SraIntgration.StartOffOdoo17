@@ -460,7 +460,13 @@ class InterviewFeedbackWizard1(models.TransientModel):
 
     manager_id = fields.Many2one('hr.interview.schedule', required=True, readonly=True)
     manager_feedback = fields.Text(string="Feedback Manager")
-
+    priority = fields.Selection([
+        ('0', 'Éliminé'),
+        ('1', 'Norma'),
+        ('2', 'Bon'),
+        ('3', 'Très Bien'),
+        ('4', 'Excellent')
+    ], string='Note', default='0')
 
     def action_submit_feedback(self):
         if self.manager_feedback or self.rh_feedback:
@@ -476,6 +482,13 @@ class InterviewFeedbackWizard2(models.TransientModel):
 
     hr_id = fields.Many2one('hr.interview.schedule', required=True, readonly=True)
     rh_feedback = fields.Text(string="Feedback RH")
+    priority = fields.Selection([
+        ('0', 'Éliminé'),
+        ('1', 'Norma'),
+        ('2', 'Bon'),
+        ('3', 'Très Bien'),
+        ('4', 'Excellent')
+    ], string='Note', default='0')
 
     def action_submit_feedback(self):
         if self.manager_feedback or self.rh_feedback:
