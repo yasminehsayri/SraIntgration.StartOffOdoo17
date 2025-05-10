@@ -396,22 +396,7 @@
 </record>
 
 
-<!-- 1. Menu principal "Entretien" sous le menu "Recrutement" -->
-<menuitem id="menu_interview"
-          name="Les entretiens"
-          parent="hr_recruitment.menu_hr_recruitment_root" />
 
-<!-- 2. Sous-menu pour "Horaires des entretiens" -->
-<menuitem id="menu_interview_schedule"
-          name="Horaires des entretiens"
-          parent="menu_interview"
-          action="action_interview_schedule" />
-
-<!-- 3. Sous-menu pour "Feedback des entretiens" -->
-<menuitem id="menu_interview_feedback"
-          name="Feedback des entretiens"
-          parent="menu_interview"
-          action="action_hr_interview" />
 
 <!-- Action for Interview Schedule -->
 <record id="action_interview_schedule_applicant" model="ir.actions.act_window">
@@ -530,8 +515,22 @@
         </form>
     </field>
 </record>
+    <!-- 1. Menu principal "Entretien" sous le menu "Recrutement" -->
+<menuitem id="menu_interview"
+          name="Les entretiens"
+          parent="hr_recruitment.menu_hr_recruitment_root" />
 
-   <menuitem id="menu_interview_feedback" name="Interview Feedback" parent="hr.menu_hr_root"/>
+<!-- 2. Sous-menu pour "Horaires des entretiens" -->
+<menuitem id="menu_interview_schedule"
+          name="Horaires des entretiens"
+          parent="menu_interview"
+          action="action_interview_schedule" />
+
+<!-- 3. Sous-menu pour "Feedback des entretiens" -->
+<menuitem id="menu_interview_feedback"
+          name="Feedback des entretiens"
+          parent="menu_interview"
+          action="action_hr_interview" />
 
     <menuitem id="menu_hr_materials_access" name="Ressources et Accès" parent="hr.menu_hr_root"/>
     <menuitem id="menu_hr_materials" name="Matériels" parent="menu_hr_materials_access" action="employee_material_action"/>
@@ -558,5 +557,92 @@
             <input type="file" name="cv_file" accept=".pdf" required="1"/>
         </xpath>
     </template>
+        <!-- Les Forrrmaaaaaaationssssssssz -->
+<record id="view_training_course_form" model="ir.ui.view">
+    <field name="name">training.course.form</field>
+    <field name="model">training.course</field>
+    <field name="arch" type="xml">
+      <form string="Formation">
+        <sheet>
+          <group>
+            <field name="name"/>
+            <field name="description"/>
+            <field name="trainer_id"/>
+          </group>
+          <notebook>
+            <page string="Sessions">
+              <field name="session_ids">
+                <tree editable="bottom">
+                  <field name="name"/>
+                  <field name="start_date"/>
+                  <field name="end_date"/>
+                </tree>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+<record id="view_training_course_tree" model="ir.ui.view">
+    <field name="name">training.course.tree</field>
+    <field name="model">training.course</field>
+    <field name="arch" type="xml">
+        <tree string="Les Formations">
+            <field name="name"/>
+            <field name="description"/>
+            <field name="trainer_id"/>
+        </tree>
+    </field>
+</record>
+  <record id="view_training_session_form" model="ir.ui.view">
+    <field name="name">training.session.form</field>
+    <field name="model">training.session</field>
+    <field name="arch" type="xml">
+      <form string="Session de Formation">
+        <sheet>
+          <group>
+            <field name="name"/>
+            <field name="course_id"/>
+            <field name="start_date"/>
+            <field name="end_date"/>
+            <field name="trainer_id"/>
+            <field name="participant_ids" widget="many2many_tags"/>
+            <field name="notes"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+<record id="view_training_session_tree" model="ir.ui.view">
+    <field name="name">training.session.tree</field>
+    <field name="model">training.session</field>
+    <field name="arch" type="xml">
+        <tree string="Les sessions">
+            <field name="name"/>
+            <field name="course_id"/>
+            <field name="trainer_id"/>
+            <field name="participant_ids" widget="many2many_tags"/>
+            <field name="notes"/>
+        </tree>
+    </field>
+</record>
+
+
+  <record id="action_training_course" model="ir.actions.act_window">
+    <field name="name">Formations</field>
+    <field name="res_model">training.course</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+
+  <record id="action_training_session" model="ir.actions.act_window">
+    <field name="name">Sessions</field>
+    <field name="res_model">training.session</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+
+    <menuitem id="menu_training_root" name="Formations" parent="hr.menu_hr_root"/>
+    <menuitem id="menu_training_course" name="Formations" parent="menu_training_root" action="action_training_course"/>
+    <menuitem id="menu_training_session" name="Sessions" parent="menu_training_root" action="action_training_session"/>
 
 </odoo>
