@@ -609,6 +609,8 @@
             <field name="trainer_id"/>
             <field name="participant_ids" widget="many2many_tags"/>
             <field name="notes"/>
+              <field name="meet_link"/>
+
           </group>
         </sheet>
       </form>
@@ -626,7 +628,7 @@
             <field name="notes"/>
         </tree>
     </field>
-</record>
+  </record>
 
 
   <record id="action_training_course" model="ir.actions.act_window">

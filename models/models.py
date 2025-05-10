@@ -533,3 +533,11 @@ class TrainingSession(models.Model):
     trainer_id = fields.Many2one('hr.employee', string='Formateur')
     participant_ids = fields.Many2many('hr.employee', string='Participants')
     notes = fields.Text(string='Notes')
+    meet_link = fields.Char(string="Lien de la réunion (Google Meet, Zoom...)")
+
+    def action_send_meeting_link(self):
+        for session in self:
+            for participant in session.participant_ids:
+                if participant.work_email:
+                    template = self.env.ref('your_module_name.email_template_meeting_link')
+                    self.env['mail.template'].browse(template.id).send_mail(session.id, force_send=True)
