@@ -431,11 +431,22 @@ class InterviewSchedule(models.Model):
     manager_feedback = fields.Text(string="Feedback Manager")
     rh_feedback = fields.Text(string="Feedback RH")
 
-    def open_feedback_popup(self):
+    def open_feedback_popup1(self):
         return {
             'type': 'ir.actions.act_window',
             'name': 'Feedback',
-            'res_model': 'interview.feedback.wizard',
+            'res_model': 'interview.feedback.wizard1',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_interview_id': self.id,
+            }
+        }
+    def open_feedback_popup2(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Feedback',
+            'res_model': 'interview.feedback.wizard2',
             'view_mode': 'form',
             'target': 'new',
             'context': {
@@ -443,18 +454,32 @@ class InterviewSchedule(models.Model):
             }
         }
 
-
-class InterviewFeedbackWizard(models.TransientModel):
-    _name = 'interview.feedback.wizard'
+class InterviewFeedbackWizard1(models.TransientModel):
+    _name = 'interview.feedback.wizard1'
     _description = 'Feedback Entretien'
 
-    interview_id = fields.Many2one('hr.interview.schedule', required=True, readonly=True)
+    manager_id = fields.Many2one('hr.interview.schedule', required=True, readonly=True)
     manager_feedback = fields.Text(string="Feedback Manager")
-    rh_feedback = fields.Text(string="Feedback RH")
+
 
     def action_submit_feedback(self):
         if self.manager_feedback or self.rh_feedback:
             self.interview_id.write({
                 'manager_feedback': self.manager_feedback,
+
+            })
+
+
+class InterviewFeedbackWizard2(models.TransientModel):
+    _name = 'interview.feedback.wizard2'
+    _description = 'Feedback Entretien'
+
+    hr_id = fields.Many2one('hr.interview.schedule', required=True, readonly=True)
+    rh_feedback = fields.Text(string="Feedback RH")
+
+    def action_submit_feedback(self):
+        if self.manager_feedback or self.rh_feedback:
+            self.interview_id.write({
                 'rh_feedback': self.rh_feedback,
+
             })

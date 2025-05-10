@@ -336,7 +336,8 @@
         <form string="Calendrier des entretiens">
             <sheet>
                 <header>
-                    <button name="open_feedback_popup" type="object" string="Ajouter Feedback" class="oe_highlight"/>
+                    <button name="open_feedback_popup1" type="object" string="Feedback Manager" class="oe_highlight"/>
+                    <button name="open_feedback_popup2" type="object" string="Feedback RH" class="oe_highlight"/>
                 </header>
 
                 <group>
@@ -428,13 +429,13 @@
 
 <record id="view_interview_feedback_wizard_form" model="ir.ui.view">
     <field name="name">interview.feedback.wizard.form</field>
-    <field name="model">interview.feedback.wizard</field>
+    <field name="model">interview.feedback.wizard1</field>
     <field name="arch" type="xml">
-        <form string="Ajouter Feedback" >
+        <form string="Feedback Manager" >
             <sheet>
                 <group>
                     <field name="manager_feedback"/>
-                    <field name="rh_feedback"/>
+
                 </group>
                 <footer>
                     <button string="Valider" type="object" name="action_submit_feedback" class="btn-primary"/>
@@ -445,7 +446,23 @@
     </field>
 </record>
 
-
+<record id="view_interview_feedback_wizard_form" model="ir.ui.view">
+    <field name="name">interview.feedback.wizard.form</field>
+    <field name="model">interview.feedback.wizard2</field>
+    <field name="arch" type="xml">
+        <form string="Feedback RH" >
+            <sheet>
+                <group>
+                    <field name="rh_feedback"/>
+                </group>
+                <footer>
+                    <button string="Valider" type="object" name="action_submit_feedback" class="btn-primary"/>
+                    <button string="Annuler" class="btn-secondary" special="cancel"/>
+                </footer>
+            </sheet>
+        </form>
+    </field>
+</record>
 
    <menuitem id="menu_interview_feedback" name="Interview Feedback" parent="hr.menu_hr_root"/>
 

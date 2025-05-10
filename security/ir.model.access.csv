@@ -10,4 +10,5 @@ access_hr_job_experience,hr.job.experience,model_hr_job_experience,base.group_us
 access_hr_applicant,hr.applicant,model_hr_applicant,base.group_user,1,1,1,1
 access_hr_job_requirement,hr.job.requirement,model_hr_job_requirement,base.group_user,1,1,1,1
 access_hr_interview_schedule,hr.interview.schedule,model_hr_interview_schedule,base.group_user,1,1,1,1
-access_interview_feedback_wizard,interview.feedback.wizard,model_interview_feedback_wizard,base.group_user,1,1,1,1
+access_interview_feedback_wizard1,interview.feedback.wizard1,model_interview_feedback_wizard1,base.group_user,1,1,1,1
+access_interview_feedback_wizard2,interview.feedback.wizard2,model_interview_feedback_wizard2,base.group_user,1,1,1,1
