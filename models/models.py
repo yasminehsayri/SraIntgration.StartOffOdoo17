@@ -512,3 +512,24 @@ class HrInterview(models.Model):
     notes = fields.Text(string="Notes")
     feedback =fields.Text(string="Feedback")
 
+class TrainingCourse(models.Model):
+    _name = 'training.course'
+    _description = 'Formation'
+
+    name = fields.Char(string='Titre de la formation', required=True)
+    description = fields.Text(string='Description')
+    trainer_id = fields.Many2one('hr.employee', string='Formateur')
+    session_ids = fields.One2many('training.session', 'course_id', string='Sessions')
+
+
+class TrainingSession(models.Model):
+    _name = 'training.session'
+    _description = 'Session de formation'
+
+    name = fields.Char(string='Nom de la session', required=True)
+    course_id = fields.Many2one('training.course', string='Formation', required=True)
+    start_date = fields.Datetime(string='Date de début')
+    end_date = fields.Datetime(string='Date de fin')
+    trainer_id = fields.Many2one('hr.employee', string='Formateur')
+    participant_ids = fields.Many2many('hr.employee', string='Participants')
+    notes = fields.Text(string='Notes')
