@@ -428,20 +428,33 @@ class InterviewSchedule(models.Model):
         ('completed', 'Completed'),
         ('canceled', 'Canceled'),
     ], string="State", default='scheduled')
+    manager_feedback = fields.Text(string="Feedback Manager")
+    rh_feedback = fields.Text(string="Feedback RH")
+
+    def open_feedback_popup(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Feedback',
+            'res_model': 'interview.feedback.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_interview_id': self.id,
+            }
+        }
 
 
+class InterviewFeedbackWizard(models.TransientModel):
+    _name = 'interview.feedback.wizard'
+    _description = 'Feedback Entretien'
 
-    class InterviewFeedback(models.Model):
-        _name = 'hr.interview.feedback'
-        _description = 'Interview Feedback'
+    interview_id = fields.Many2one('hr.interview.schedule', required=True, readonly=True)
+    manager_feedback = fields.Text(string="Feedback Manager")
+    rh_feedback = fields.Text(string="Feedback RH")
 
-        interview_id = fields.Many2one('hr.interview.schedule', string="Interview", required=True)
-        manager_id = fields.Many2one('hr.employee', string="Manager", required=True)
-        rating = fields.Selection([
-            ('1', 'Poor'),
-            ('2', 'Fair'),
-            ('3', 'Good'),
-            ('4', 'Very Good'),
-            ('5', 'Excellent')
-        ], string="Rating", required=True)
-        remarks = fields.Text(string="Remarks")
+    def action_submit_feedback(self):
+        if self.manager_feedback or self.rh_feedback:
+            self.interview_id.write({
+                'manager_feedback': self.manager_feedback,
+                'rh_feedback': self.rh_feedback,
+            })
