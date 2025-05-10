@@ -396,23 +396,6 @@
 </record>
 
 
-<!-- 1. Menu principal "Entretien" sous le menu "Recrutement" -->
-<menuitem id="menu_interview"
-          name="Les entretiens"
-          parent="hr_recruitment.menu_hr_recruitment_root" />
-
-<!-- 2. Sous-menu pour "Horaires des entretiens" -->
-<menuitem id="menu_interview_schedule"
-          name="Horaires des entretiens"
-          parent="menu_interview"
-          action="action_interview_schedule" />
-
-<!-- 3. Sous-menu pour "Feedback des entretiens" -->
-<menuitem id="menu_interview_feedback"
-          name="Feedback des entretiens"
-          parent="menu_interview"
-          action="action_hr_interview" />
-
 <!-- Action for Interview Schedule -->
 <record id="action_interview_schedule_applicant" model="ir.actions.act_window">
     <field name="name">Les entretiens</field>
@@ -531,7 +514,24 @@
     </field>
 </record>
 
-   <menuitem id="menu_interview_feedback" name="Interview Feedback" parent="hr.menu_hr_root"/>
+
+<!-- 1. Menu principal "Entretien" sous le menu "Recrutement" -->
+<menuitem id="menu_interview"
+          name="Les entretiens"
+          parent="hr_recruitment.menu_hr_recruitment_root" />
+
+<!-- 2. Sous-menu pour "Horaires des entretiens" -->
+<menuitem id="menu_interview_schedule"
+          name="Horaires des entretiens"
+          parent="menu_interview"
+          action="action_interview_schedule" />
+
+<!-- 3. Sous-menu pour "Feedback des entretiens" -->
+<menuitem id="menu_interview_feedback"
+          name="Feedback des entretiens"
+          parent="menu_interview"
+          action="action_hr_interview" />
+
 
     <menuitem id="menu_hr_materials_access" name="Ressources et Accès" parent="hr.menu_hr_root"/>
     <menuitem id="menu_hr_materials" name="Matériels" parent="menu_hr_materials_access" action="employee_material_action"/>
