@@ -430,6 +430,7 @@ class InterviewSchedule(models.Model):
     ], string="State", default='scheduled')
     manager_feedback = fields.Text(string="Feedback Manager")
     rh_feedback = fields.Text(string="Feedback RH")
+    feedback_ids = fields.One2many('interview.feedback.wizard1', 'interview_id', string="Feedbacks Manager")
 
     def open_feedback_popup1(self):
         return {
@@ -454,11 +455,11 @@ class InterviewSchedule(models.Model):
             }
         }
 
-class InterviewFeedbackWizard1(models.TransientModel):
+class InterviewFeedbackWizard1(models.Model):
     _name = 'interview.feedback.wizard1'
     _description = 'Feedback Entretien'
-
-    manager_id = fields.Many2one('hr.interview.schedule', required=True, readonly=True)
+    interview_id = fields.Many2one('hr.interview.schedule', string='Entretien lié')
+    manager_id = fields.Many2one('hr.interview.schedule', required=True)
     manager_feedback = fields.Text(string="Feedback Manager")
     priority = fields.Selection([
         ('0', 'Éliminé'),
@@ -476,11 +477,11 @@ class InterviewFeedbackWizard1(models.TransientModel):
             })
 
 
-class InterviewFeedbackWizard2(models.TransientModel):
+class InterviewFeedbackWizard2(models.Model):
     _name = 'interview.feedback.wizard2'
     _description = 'Feedback Entretien'
-
-    hr_id = fields.Many2one('hr.interview.schedule', required=True, readonly=True)
+    interview_id = fields.Many2one('hr.interview.schedule', string='Entretien lié')
+    rh_id = fields.Many2one('hr.interview.schedule', required=True)
     rh_feedback = fields.Text(string="Feedback RH")
     priority = fields.Selection([
         ('0', 'Éliminé'),
@@ -496,3 +497,18 @@ class InterviewFeedbackWizard2(models.TransientModel):
                 'rh_feedback': self.rh_feedback,
 
             })
+class HrInterview(models.Model):
+    _name = 'hr.interview'
+    _description = 'Entretien Candidat'
+
+    candidate_id = fields.Many2one('hr.candidate.cv', string="Candidat", required=True, ondelete='cascade')
+    date = fields.Datetime(string="Date de l'entretien", required=True)
+    interviewer = fields.Many2one('res.users', string="Interviewer", default=lambda self: self.env.user)
+    result = fields.Selection([
+        ('passed', 'Réussi'),
+        ('failed', 'Échoué'),
+        ('pending', 'En attente')
+    ], string="Résultat", default='pending')
+    notes = fields.Text(string="Notes")
+    feedback =fields.Text(string="Feedback")
+

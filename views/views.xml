@@ -303,7 +303,7 @@
         </field>
     </record>
 
-    <record id="view_hr_candidate_cv_form" model="ir.ui.view">
+    <record id="view_hr_job_requirement_form" model="ir.ui.view">
         <field name="name">hr.job.requirement.form</field>
         <field name="model">hr.job.requirement</field>
         <field name="arch" type="xml">
@@ -395,8 +395,23 @@
     <field name="domain">[]</field> <!-- Remove the filter based on applicant_id -->
 </record>
 
-<!-- Menu item for Interview Schedules -->
-<menuitem id="menu_interview_schedule" name="Interview Schedules" parent="hr_recruitment.menu_hr_recruitment_root" action="action_interview_schedule"/>
+
+<!-- 1. Menu principal "Entretien" sous le menu "Recrutement" -->
+<menuitem id="menu_interview"
+          name="Les entretiens"
+          parent="hr_recruitment.menu_hr_recruitment_root" />
+
+<!-- 2. Sous-menu pour "Horaires des entretiens" -->
+<menuitem id="menu_interview_schedule"
+          name="Horaires des entretiens"
+          parent="menu_interview"
+          action="action_interview_schedule" />
+
+<!-- 3. Sous-menu pour "Feedback des entretiens" -->
+<menuitem id="menu_interview_feedback"
+          name="Feedback des entretiens"
+          parent="menu_interview"
+          action="action_hr_interview" />
 
 <!-- Action for Interview Schedule -->
 <record id="action_interview_schedule_applicant" model="ir.actions.act_window">
@@ -427,6 +442,52 @@
     </field>
 </record>
 
+
+    <!-- 1. Vue formulaire pour l'entretien -->
+<record id="view_hr_interview_form" model="ir.ui.view">
+    <field name="name">hr.interview.form</field>
+    <field name="model">hr.interview</field>
+    <field name="arch" type="xml">
+        <form string="Entretien">
+            <sheet>
+                <group>
+                    <field name="candidate_id"/>
+                    <field name="date"/>
+                    <field name="interviewer"/>
+                    <field name="result"/>
+                    <field name="notes"/>
+                    <field name="feedback"/>
+                </group>
+            </sheet>
+        </form>
+    </field>
+</record>
+
+<!-- 2. Vue liste (tree) -->
+<record id="view_hr_interview_tree" model="ir.ui.view">
+    <field name="name">hr.interview.tree</field>
+    <field name="model">hr.interview</field>
+    <field name="arch" type="xml">
+        <tree string="Entretiens">
+            <field name="candidate_id"/>
+            <field name="date"/>
+            <field name="interviewer"/>
+            <field name="result"/>
+            <field name="feedback"/>
+        </tree>
+    </field>
+</record>
+
+
+<record id="action_hr_interview" model="ir.actions.act_window">
+    <field name="name">Entretiens</field>
+    <field name="res_model">hr.interview</field>
+    <field name="view_mode">tree,form</field>
+    <field name="view_id" ref="view_hr_interview_tree"/>
+    <field name="target">current</field> <!-- ou 'new' pour une pop-up -->
+</record>
+
+
 <record id="view_interview_feedback_wizard_form1" model="ir.ui.view">
     <field name="name">interview.feedback.wizard.form</field>
     <field name="model">interview.feedback.wizard1</field>
@@ -434,12 +495,15 @@
         <form string="Feedback Manager" >
             <sheet>
                 <group>
+                    <field name="interview_id" invisible="1"/>
+                    <field name="manager_id"/>
                     <field name="manager_feedback"/>
                     <field name="priority" widget="priority" field_id="priority_0"/>
                 </group>
                 <footer>
                     <button string="Valider" type="object" name="action_submit_feedback" class="btn-primary"/>
                     <button string="Annuler" class="btn-secondary" special="cancel"/>
+
                 </footer>
             </sheet>
         </form>
@@ -453,6 +517,8 @@
         <form string="Feedback RH" >
             <sheet>
                 <group>
+                    <field name="interview_id" invisible="1"/>
+                    <field name="rh_id" />
                     <field name="rh_feedback"/>
                     <field name="priority" widget="priority" field_id="priority_0"/>
                 </group>
@@ -492,4 +558,5 @@
             <input type="file" name="cv_file" accept=".pdf" required="1"/>
         </xpath>
     </template>
+
 </odoo>
