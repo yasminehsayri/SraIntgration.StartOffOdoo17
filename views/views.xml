@@ -486,7 +486,7 @@
                 <footer>
                     <button string="Valider" type="object" name="action_submit_feedback" class="btn-primary"/>
                     <button string="Annuler" class="btn-secondary" special="cancel"/>
-
+                    <button name="%(action_hr_interview)d" type="action" string="Voir Feedback" class="btn-primary"/>
                 </footer>
             </sheet>
         </form>
@@ -508,6 +508,7 @@
                 <footer>
                     <button string="Valider" type="object" name="action_submit_feedback" class="btn-primary"/>
                     <button string="Annuler" class="btn-secondary" special="cancel"/>
+                    <button name="%(action_hr_interview)d" type="action" string="Voir Feedback" class="btn-primary"/>
                 </footer>
             </sheet>
         </form>
