@@ -84,6 +84,8 @@ class HrJob(models.Model):
 
         return keywords
 
+
+
 class HrApplicant(models.Model):
     _inherit = 'hr.applicant'
 
@@ -91,6 +93,7 @@ class HrApplicant(models.Model):
     cv_filename = fields.Char(string="Nom du fichier CV")
     ats_score = fields.Float(string="Score ATS", store=True)
     score_detail = fields.Text(string='Score Details')
+
 
     def _process_cv_and_score(self):
         """Shared method to process CV and calculate ATS score."""
@@ -144,63 +147,30 @@ class HrApplicant(models.Model):
         _logger.info("Onchange triggered for cv_file or job_id on applicant %s", self.id)
         self._process_cv_and_score()
 
-class WebsiteHrRecruitmentCustom(WebsiteHrRecruitment):
-    @http.route(['/jobs/apply/<model("hr.job"):job>'], type='http', auth="public", website=True, sitemap=True)
-    def jobs_apply(self, job, **kwargs):
-        _logger.info("Custom jobs_apply called for job: %s", job.name)
-        _logger.info("Job keywords: %s", job._get_keywords())
-        result = super(WebsiteHrRecruitmentCustom, self).jobs_apply(job, **kwargs)
-        _logger.info("Custom jobs_apply called for job: %s", job)
+class SurveyUserInput(models.Model):
+    _inherit = 'survey.user_input'
 
-        if request.httprequest.method == 'POST':
-            cv_file = request.httprequest.files.get('cv_file') or request.httprequest.files.get('ufile')
-            if cv_file:
-                _logger.info("CV file received: %s", cv_file.filename)
-                try:
-                    if not cv_file.filename.lower().endswith('.pdf'):
-                        _logger.warning("Invalid file type uploaded: %s", cv_file.filename)
-                        return request.redirect('/jobs/apply/%s?error=invalid_file' % job.id)
-
-                    cv_content = cv_file.read()
-                    cv_filename = cv_file.filename
-                    email = request.params.get('email')
-                    applicant = request.env['hr.applicant'].sudo().search(
-                        [('job_id', '=', job.id), ('email_from', '=', email)],
-                        order='id desc', limit=1
-                    )
-                    if not applicant:
-                        _logger.info("No applicant found, creating new for job %s, email %s", job.id, email)
-                        applicant = request.env['hr.applicant'].sudo().create({
-                            'job_id': job.id,
-                            'email_from': email,
-                            'name': request.params.get('name'),
-                            'cv_file': base64.b64encode(cv_content),
-                            'cv_filename': cv_filename,
-                        })
-                    else:
-                        _logger.info("Updating applicant %s with CV: %s", applicant.id, cv_filename)
-                        applicant.write({
-                            'cv_file': base64.b64encode(cv_content),
-                            'cv_filename': cv_filename,
-                        })
-                    applicant._process_cv_and_score()
-                except Exception as e:
-                    _logger.error("Error processing CV file: %s", str(e))
-                    return request.redirect('/jobs/apply/%s?error=file_processing' % job.id)
-            else:
-                _logger.warning("No CV file found in form data")
-        return result
+    applicant_id = fields.Many2one('hr.applicant', string='Candidat')
 
 class CandidateCV(models.Model):
     _name = "hr.candidate.cv"
     _description = "CV des candidats"
     applicant_id = fields.Many2one('hr.applicant', string="Candidature")
     name = fields.Char( string="Nom du candidat")
+    partner_id = fields.Many2one('res.partner', string="Partenaire (candidat)")
     job_id = fields.Many2one('hr.job', string="Poste visé", required=True, ondelete='cascade')
     cv_file = fields.Binary(string="CV (PDF)")
     cv_filename = fields.Char(string="CV du candidat")
     application_date = fields.Date(string="Date de postulation", default=fields.Date.today)
-    departement = fields.Char(string="Département", required=True)
+    departement = fields.Char(string="Département")
+    survey_input_ids = fields.One2many(
+        'survey.user_input', 'partner_id', string='Résultats du test'
+    )
+    scoring_percentage = fields.Float(
+        string="Score Test (%)",
+        related='survey_input_ids.scoring_percentage',
+        store=True
+    )
     extracted_text = fields.Text(string="Extracted CV Text")
     ats_score = fields.Float(string="Score ATS", store=True)
     resume_summary = fields.Text(string="Résumé du CV", readonly=True)
@@ -398,21 +368,6 @@ class JobRequirement(models.Model):
     departement = fields.Char(string="Département", required=True)
     description = fields.Char(string="Description", required=True)
     user_id = fields.Many2one('res.users', 'Responsable RH', default=lambda self: self.env.user)
-    @api.model
-    def create(self, vals):
-        res = super(JobRequirement, self).create(vals)
-
-        # Récupérer l'utilisateur RH
-        rh_user = self.env.ref('hr.group_hr_user').users[0]  # Assurez-vous qu'il y a bien un utilisateur RH assigné
-
-        # Envoyer un e-mail de notification
-        template = self.env.ref('hr_recruitment.email_template_requirement_added')
-        if template:
-            # Passer l'objet à envoyer avec l'email
-            template.sudo().send_mail(res.id, force_send=True)
-        else:
-            raise UserError("Template d'email non trouvé.")
-        return res
 
 class InterviewSchedule(models.Model):
     _name = 'hr.interview.schedule'
@@ -534,10 +489,3 @@ class TrainingSession(models.Model):
     participant_ids = fields.Many2many('hr.employee', string='Participants')
     notes = fields.Text(string='Notes')
     meet_link = fields.Char(string="Lien de la réunion (Google Meet, Zoom...)")
-
-    def action_send_meeting_link(self):
-        for session in self:
-            for participant in session.participant_ids:
-                if participant.work_email:
-                    template = self.env.ref('your_module_name.email_template_meeting_link')
-                    self.env['mail.template'].browse(template.id).send_mail(session.id, force_send=True)

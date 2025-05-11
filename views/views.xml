@@ -193,7 +193,7 @@
     <field name="inherit_id" ref="hr_recruitment.hr_job_simple_form"/>
     <field name="arch" type="xml">
         <!-- Ajouter un groupe après un groupe spécifique -->
-        <xpath expr="//group" position="inside">
+        <xpath expr="//group" position="after">
             <group string="Exigences pondérées">
                 <!-- Expériences pondérées -->
                 <field name="experience_ids" widget="one2many">
@@ -252,6 +252,7 @@
                 <field name="cv_filename"/>
                 <field name="departement"/>
                 <field name="application_date"/>
+                <field name="scoring_percentage" readonly="1"/>
                 <field name="ats_score"/>
                 <field name="resume_summary"/>
                 <button name="generate_cv_summary" type="object" string="Générer Résumé" class="oe_highlight"/>
@@ -271,6 +272,7 @@
                         <field name="cv_file" filename="cv_filename"/>
                         <field name="application_date"/>
                         <field name="departement"/>
+                        <field name="survey_input_ids"/>
                         <field name="ats_score"/>
                         <field name="extracted_text" widget="text" readonly="1"/>
                         <field name="resume_summary" widget="text" readonly="1"/>
@@ -412,7 +414,7 @@
     <field name="model">hr.applicant</field>
     <field name="inherit_id" ref="hr_recruitment.hr_applicant_view_form"/>
     <field name="arch" type="xml">
-        <xpath expr="//button[@name='action_makeMeeting']" position="replace">
+        <xpath expr="//button[@name='action_makeMeeting']" position="after">
             <button name="%(action_interview_schedule_applicant)d"
                     type="action"
                     class="oe_stat_button"
@@ -551,12 +553,6 @@
         </field>
     </record>
 
-    <!-- Website template -->
-    <template id="website_hr_recruitment_apply_form_inherit" inherit_id="website_hr_recruitment.apply">
-        <xpath expr="//input[@name='Resume']" position="replace">
-            <input type="file" name="cv_file" accept=".pdf" required="1"/>
-        </xpath>
-    </template>
         <!-- Les Forrrmaaaaaaationssssssssz -->
 <record id="view_training_course_form" model="ir.ui.view">
     <field name="name">training.course.form</field>
