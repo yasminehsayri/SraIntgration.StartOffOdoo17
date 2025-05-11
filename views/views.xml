@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <!-- hr.employee view
+    <record id="employee_material_action_employee" model="ir.actions.act_window">
+        <field name="name">Employee Materials</field>
+        <field name="res_model">employee.material</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('employee_id', '=', active_id)]</field>
+        <field name="context">{'default_employee_id': active_id}</field>
+    </record>
+    <record id="employee_access_action_employee" model="ir.actions.act_window">
+        <field name="name">Employee Access</field>
+        <field name="res_model">employee.access</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('employee_id', '=', active_id)]</field>
+        <field name="context">{'default_employee_id': active_id}</field>
+    </record>
+    <!-- hr.employee view-->
         <record id="view_hr_employee_form_inherit_materials" model="ir.ui.view">
         <field name="name">hr.employee.form.inherit.materials</field>
         <field name="model">hr.employee</field>
@@ -8,19 +22,19 @@
         <field name="arch" type="xml">
             <xpath expr="//group//field[@name='work_email']" position="after">
                 <field name="age" invisible="1"/>
-                <button name="%(employee_material_action)d"
+                <button name="%(employee_material_action_employee)d"
                         type="action"
                         class="oe_stat_button"
                         icon="fa-file"
                         string="Ressources"/>
-                <button name="%(employee_access_action)d"
+                <button name="%(employee_access_action_employee)d"
                         type="action"
                         class="oe_stat_button"
                         icon="fa-file"
                         string="Acces"/>
             </xpath>
         </field>
-    </record> -->
+    </record>
 
     <!-- employee.material views -->
     <record id="employee_material_form" model="ir.ui.view">
@@ -53,12 +67,6 @@
                 <field name="date_assigned"/>
             </tree>
         </field>
-    </record>
-
-    <record id="employee_material_action" model="ir.actions.act_window">
-        <field name="name">Employee Materials</field>
-        <field name="res_model">employee.material</field>
-        <field name="view_mode">tree,form</field>
     </record>
 
     <!-- employee.access views -->
@@ -94,12 +102,17 @@
         </field>
     </record>
 
-    <record id="employee_access_action" model="ir.actions.act_window">
+    <record id="employee_material_action" model="ir.actions.act_window">
+        <field name="name">Employee Materials</field>
+        <field name="res_model">employee.material</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+   <record id="employee_access_action" model="ir.actions.act_window">
         <field name="name">Employee Access</field>
         <field name="res_model">employee.access</field>
         <field name="view_mode">tree,form</field>
     </record>
-
     <!-- Menu for materials and access -->
     <menuitem id="menu_hr_materials_access" name="Ressources et Accès" parent="hr.menu_hr_root"/>
     <menuitem id="menu_hr_materials" name="Matériels" parent="menu_hr_materials_access" action="employee_material_action"/>
@@ -329,73 +342,6 @@
     </record>
 
     <menuitem id="menu_requirement_job" name="Les exigences du poste" parent="hr_recruitment.menu_hr_recruitment_root" action="action_requirement_job"/>
-
-<!-- Form View for Interview Schedule -->
-<record id="view_interview_schedule_form" model="ir.ui.view">
-    <field name="name">interview.schedule.form</field>
-    <field name="model">hr.interview.schedule</field>
-    <field name="arch" type="xml">
-        <form string="Calendrier des entretiens">
-            <sheet>
-                <header>
-                    <button name="open_feedback_popup1" type="object" string="Feedback Manager" class="oe_highlight"/>
-                    <button name="open_feedback_popup2" type="object" string="Feedback RH" class="oe_highlight"/>
-                </header>
-
-                <group>
-                    <field name="name"/>
-                    <field name="job_id"/>
-                    <field name="applicant_id"/>
-                    <field name="interview_date" widget="datetime"/>
-                    <field name="hr_id"/>
-                    <field name="manager_id"/>
-                    <field name="state"/>
-                </group>
-            </sheet>
-        </form>
-    </field>
-</record>
-
-<!-- Tree View for Interview Schedule -->
-<record id="view_interview_schedule_tree" model="ir.ui.view">
-    <field name="name">interview.schedule.tree</field>
-    <field name="model">hr.interview.schedule</field>
-    <field name="arch" type="xml">
-        <tree>
-            <field name="name"/>
-            <field name="job_id"/>
-            <field name="applicant_id"/>
-            <field name="interview_date" widget="datetime"/>
-            <field name="hr_id"/>
-            <field name="manager_id"/>
-            <field name="state"/>
-        </tree>
-    </field>
-</record>
-
-<!-- Calendar View for Interview Schedule -->
-<record id="view_interview_schedule_calendar" model="ir.ui.view">
-    <field name="name">interview.schedule.calendar</field>
-    <field name="model">hr.interview.schedule</field>
-    <field name="arch" type="xml">
-        <calendar string="Calendrier des entretiens"
-                  date_start="interview_date"
-                  color="hr_id">
-            <field name="name"/>
-            <field name="applicant_id"/>
-            <field name="job_id"/>
-        </calendar>
-    </field>
-</record>
-
-<!-- Action for Interview Schedule -->
-<record id="action_interview_schedule" model="ir.actions.act_window">
-    <field name="name">Les entretiens</field>
-    <field name="res_model">hr.interview.schedule</field>
-    <field name="context">{}</field>
-    <!-- Modify the domain to show all records -->
-    <field name="domain">[]</field> <!-- Remove the filter based on applicant_id -->
-</record>
     ####################################################
 <!-- Button on Applicant Form View to View Interviews -->
 <record id="view_hr_applicant_form_inherit_calendar_button" model="ir.ui.view">
@@ -563,11 +509,6 @@
           name="Feedback des entretiens"
           parent="menu_interview"
           action="action_hr_interview" />
-
-
-    <menuitem id="menu_hr_materials_access" name="Ressources et Accès" parent="hr.menu_hr_root"/>
-    <menuitem id="menu_hr_materials" name="Matériels" parent="menu_hr_materials_access" action="employee_material_action"/>
-    <menuitem id="menu_hr_access" name="Accès" parent="menu_hr_materials_access" action="employee_access_action"/>
 
     <!-- hr.applicant view -->
     <record id="view_hr_applicant_form_inherit_cv" model="ir.ui.view">
