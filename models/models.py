@@ -364,11 +364,19 @@ class EmployeeMaterial(models.Model):
     _name = 'employee.material'
     _description = 'Employee Materials'
 
-    employee_id = fields.Many2one('hr.employee', string='Employee', required=True, ondelete='cascade')
+    employee_id = fields.Many2one('hr.employee', string='Employee', ondelete='cascade')
     material_name = fields.Char(string='Material Name', required=True)
     description = fields.Text(string='Description')
-    date_assigned = fields.Date(string='Date Assigned', default=fields.Date.today)
+    date_assigned = fields.Date(string='Date Assigned')
     serial_number = fields.Char(string="Numéro de série")
+    is_assigned = fields.Boolean(string="Attribué", compute='_compute_is_assigned', store=True)
+
+    @api.depends('employee_id')
+    def _compute_is_assigned(self):
+        for record in self:
+            record.is_assigned = bool(record.employee_id)
+
+
 
 class EmployeeAccess(models.Model):
     _name = 'employee.access'

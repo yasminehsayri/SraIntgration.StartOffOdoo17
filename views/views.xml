@@ -44,8 +44,8 @@
             <form string="Employee Material">
                 <sheet>
                     <group>
-                        <field name="employee_id"/>
                         <field name="material_name"/>
+                        <field name="employee_id"/>
                         <field name="serial_number"/>
                         <field name="description"/>
                         <field name="date_assigned"/>
@@ -59,12 +59,10 @@
         <field name="name">employee.material.tree</field>
         <field name="model">employee.material</field>
         <field name="arch" type="xml">
-            <tree string="Employee Materials">
-                <field name="employee_id"/>
+            <tree string=" Materials">
                 <field name="material_name"/>
                 <field name="serial_number"/>
-                <field name="description"/>
-                <field name="date_assigned"/>
+                <field name="is_assigned" />
             </tree>
         </field>
     </record>
