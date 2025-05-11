@@ -96,7 +96,6 @@ class HrApplicant(models.Model):
 
 
     def _process_cv_and_score(self):
-
         """Shared method to process CV and calculate ATS score."""
         _logger.info("Processing CV for applicant %s, job %s, filename %s", self.id, self.job_id.name if self.job_id else "None", self.cv_filename)
         if self.cv_file and self.job_id:
@@ -107,7 +106,6 @@ class HrApplicant(models.Model):
                 _logger.error("Failed to decode CV file for applicant %s: %s", self.id, str(e))
                 self.ats_score = 0.0
                 return
-
             cv_record = self.env['hr.candidate.cv'].sudo().search(
                 [('name', '=', self.id), ('job_id', '=', self.job_id.id)],
                 limit=1
@@ -132,25 +130,7 @@ class HrApplicant(models.Model):
             cv_record.write({'ats_score': score})
             self.write({'ats_score': score})
             _logger.info("ATS score set to %s for applicant %s and CV %s", score, self.id, cv_record.id)
-            # S'assurer que l'enregistrement hr.applicant est enregistré
-            if not self.id:
-                _logger.warning("hr.applicant not saved yet, cannot create hr.candidate.cv")
-                self.ats_score = 0.0
-                return
-            # Créer l'enregistrement hr.candidate.cv
-            cv_record = self.env['hr.candidate.cv'].create({
-                'name': self.id,  # self.id est l'ID de hr.applicant
-                'job_id': self.job_id.id,
-                'cv_file': self.cv_file,
-                'cv_filename': self.cv_filename or "cv.pdf",
-                'departement': self.department_id.name if self.department_id else "Non spécifié",
-            })
-            score = cv_record._calculate_ats_score()
-            _logger.info("Calculated ATS score: %s for applicant %s", score, self.id)
-            cv_record.ats_score = score
-            self.ats_score = score
         else:
-            _logger.warning("No cv_file or job_id provided, setting ATS score to 0")
             self.ats_score = 0.0
             _logger.warning("No CV or job for applicant %s (cv_file: %s, job_id: %s)",
                            self.id, bool(self.cv_file), self.job_id.id if self.job_id else "None")
