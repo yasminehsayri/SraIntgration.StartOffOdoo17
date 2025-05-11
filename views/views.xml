@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <!-- hr.employee view -->
-    <record id="view_hr_employee_form_inherit_materials" model="ir.ui.view">
+    <!-- hr.employee view
+        <record id="view_hr_employee_form_inherit_materials" model="ir.ui.view">
         <field name="name">hr.employee.form.inherit.materials</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_form"/>
@@ -21,7 +21,7 @@
                         string="Acces"/>
             </xpath>
         </field>
-    </record>
+    </record> -->
 
     <!-- employee.material views -->
     <record id="employee_material_form" model="ir.ui.view">
@@ -109,21 +109,140 @@
     <menuitem id="menu_hr_access" name="Accès" parent="menu_hr_materials_access" action="employee_access_action"/>
 
     <!-- hr.job view -->
-    <record id="view_hr_job_form_inherit" model="ir.ui.view">
-        <field name="name">hr.job.form.inherit</field>
-        <field name="model">hr.job</field>
-        <field name="inherit_id" ref="hr_recruitment.hr_job_simple_form"/>
-        <field name="arch" type="xml">
-            <xpath expr="//group" position="inside">
-                <group string="Critère de recherche">
-                    <field name="name"/>
-                    <field name="experience"/>
-                    <field name="key_words"/>
-                    <field name="skills"/>
-                </group>
-            </xpath>
-        </field>
-    </record>
+ <!-- ========== Vues pour les compétences pondérées ========== -->
+<record id="view_hr_job_skill_tree" model="ir.ui.view">
+    <field name="name">hr.job.skill.tree</field>
+    <field name="model">hr.job.skill</field>
+    <field name="arch" type="xml">
+        <tree>
+            <field name="name"/>
+            <field name="weight"/>
+            <field name="job_id"/>
+        </tree>
+    </field>
+</record>
+
+<record id="view_hr_job_skill_form" model="ir.ui.view">
+    <field name="name">hr.job.skill.form</field>
+    <field name="model">hr.job.skill</field>
+    <field name="arch" type="xml">
+        <form>
+            <group>
+                <field name="job_id"/>
+                <field name="name"/>
+                <field name="weight"/>
+            </group>
+        </form>
+    </field>
+</record>
+
+<!-- ========== Vues pour les mots-clés pondérés ========== -->
+<record id="view_hr_job_keyword_tree" model="ir.ui.view">
+    <field name="name">hr.job.keyword.tree</field>
+    <field name="model">hr.job.keyword</field>
+    <field name="arch" type="xml">
+        <tree>
+            <field name="job_id"/>
+            <field name="name"/>
+            <field name="weight"/>
+        </tree>
+    </field>
+</record>
+
+<record id="view_hr_job_keyword_form" model="ir.ui.view">
+    <field name="name">hr.job.keyword.form</field>
+    <field name="model">hr.job.keyword</field>
+    <field name="arch" type="xml">
+        <form>
+            <group>
+                <field name="job_id"/>
+                <field name="name"/>
+                <field name="weight"/>
+            </group>
+        </form>
+    </field>
+</record>
+
+<!-- ========== Vues pour les expériences pondérées ========== -->
+<record id="view_hr_job_experience_tree" model="ir.ui.view">
+    <field name="name">hr.job.experience.tree</field>
+    <field name="model">hr.job.experience</field>
+    <field name="arch" type="xml">
+        <tree>
+            <field name="job_id"/>
+            <field name="name"/>
+            <field name="weight"/>
+        </tree>
+    </field>
+</record>
+
+<record id="view_hr_job_experience_form" model="ir.ui.view">
+    <field name="name">hr.job.experience.form</field>
+    <field name="model">hr.job.experience</field>
+    <field name="arch" type="xml">
+        <form>
+            <group>
+                <field name="job_id"/>
+                <field name="name"/>
+                <field name="weight"/>
+            </group>
+        </form>
+    </field>
+</record>
+
+<record id="view_hr_job_form_inherit_weighted_fields" model="ir.ui.view">
+    <field name="name">hr.job.form.inherit.weighted.fields</field>
+    <field name="model">hr.job</field>
+    <field name="inherit_id" ref="hr_recruitment.hr_job_simple_form"/>
+    <field name="arch" type="xml">
+        <!-- Ajouter un groupe après un groupe spécifique -->
+        <xpath expr="//group" position="after">
+            <group string="Exigences pondérées">
+                <!-- Expériences pondérées -->
+                <field name="experience_ids" widget="one2many">
+                    <tree editable="bottom">
+                        <field name="name"/>
+                        <field name="weight"/>
+                    </tree>
+                    <form string="Expérience pondérée">
+                        <group>
+                            <field name="name"/>
+                            <field name="weight"/>
+                        </group>
+                    </form>
+                </field>
+
+                <!-- Mots-clés pondérés -->
+                <field name="keyword_ids" widget="one2many">
+                    <tree editable="bottom">
+                        <field name="name"/>
+                        <field name="weight"/>
+                    </tree>
+                    <form string="Mot-clé pondéré">
+                        <group>
+                            <field name="name"/>
+                            <field name="weight"/>
+                        </group>
+                    </form>
+                </field>
+
+                <!-- Compétences pondérées -->
+                <field name="skill_ids" widget="one2many">
+                    <tree editable="bottom">
+                        <field name="name"/>
+                        <field name="weight"/>
+                    </tree>
+                    <form string="Compétence pondérée">
+                        <group>
+                            <field name="name"/>
+                            <field name="weight"/>
+                        </group>
+                    </form>
+                </field>
+            </group>
+        </xpath>
+    </field>
+</record>
 
     <!-- hr.candidate.cv views -->
     <record id="view_hr_candidate_cv_tree" model="ir.ui.view">
@@ -136,7 +255,10 @@
                 <field name="cv_filename"/>
                 <field name="departement"/>
                 <field name="application_date"/>
+                <field name="scoring_percentage" readonly="1"/>
                 <field name="ats_score"/>
+                <field name="resume_summary"/>
+                <button name="generate_cv_summary" type="object" string="Générer Résumé" class="oe_highlight"/>
             </tree>
         </field>
     </record>
@@ -148,13 +270,16 @@
             <form>
                 <sheet>
                     <group>
-                        <field name="name" widget="many2one"/>
-                        <field name="job_id" widget="many2one"/>
+                        <field name="name"/>
+                        <field name="job_id"/>
                         <field name="cv_file" filename="cv_filename"/>
                         <field name="application_date"/>
                         <field name="departement"/>
+                        <field name="survey_input_ids"/>
                         <field name="ats_score"/>
                         <field name="extracted_text" widget="text" readonly="1"/>
+                        <field name="resume_summary" widget="text" readonly="1"/>
+                        <button name="generate_cv_summary" type="object" string="Générer Résumé" class="oe_highlight"/>
                     </group>
                 </sheet>
             </form>
@@ -168,6 +293,284 @@
     </record>
 
     <menuitem id="menu_hr_candidate_cv" name="CV des Candidats" parent="hr_recruitment.menu_hr_recruitment_root" action="action_hr_candidate_cv"/>
+
+        <!-- hr.candidate.cv views -->
+    <record id="view_hr_job_requirement_tree" model="ir.ui.view">
+        <field name="name">hr.job.requirement.tree</field>
+        <field name="model">hr.job.requirement</field>
+        <field name="arch" type="xml">
+            <tree>
+
+                <field name="job_id"/>
+                <field name="departement"/>
+                <field name="description"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_hr_job_requirement_form" model="ir.ui.view">
+        <field name="name">hr.job.requirement.form</field>
+        <field name="model">hr.job.requirement</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="job_id"/>
+                        <field name="departement"/>
+                        <field name="description"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+     <record id="action_requirement_job" model="ir.actions.act_window">
+        <field name="name">Les exigences du poste</field>
+        <field name="res_model">hr.job.requirement</field>
+        <field name="view_mode">tree,form</field>
+
+    </record>
+
+    <menuitem id="menu_requirement_job" name="Les exigences du poste" parent="hr_recruitment.menu_hr_recruitment_root" action="action_requirement_job"/>
+
+<!-- Form View for Interview Schedule -->
+<record id="view_interview_schedule_form" model="ir.ui.view">
+    <field name="name">interview.schedule.form</field>
+    <field name="model">hr.interview.schedule</field>
+    <field name="arch" type="xml">
+        <form string="Calendrier des entretiens">
+            <sheet>
+                <header>
+                    <button name="open_feedback_popup1" type="object" string="Feedback Manager" class="oe_highlight"/>
+                    <button name="open_feedback_popup2" type="object" string="Feedback RH" class="oe_highlight"/>
+                </header>
+
+                <group>
+                    <field name="name"/>
+                    <field name="job_id"/>
+                    <field name="applicant_id"/>
+                    <field name="interview_date" widget="datetime"/>
+                    <field name="hr_id"/>
+                    <field name="manager_id"/>
+                    <field name="state"/>
+                </group>
+            </sheet>
+        </form>
+    </field>
+</record>
+
+<!-- Tree View for Interview Schedule -->
+<record id="view_interview_schedule_tree" model="ir.ui.view">
+    <field name="name">interview.schedule.tree</field>
+    <field name="model">hr.interview.schedule</field>
+    <field name="arch" type="xml">
+        <tree>
+            <field name="name"/>
+            <field name="job_id"/>
+            <field name="applicant_id"/>
+            <field name="interview_date" widget="datetime"/>
+            <field name="hr_id"/>
+            <field name="manager_id"/>
+            <field name="state"/>
+        </tree>
+    </field>
+</record>
+
+<!-- Calendar View for Interview Schedule -->
+<record id="view_interview_schedule_calendar" model="ir.ui.view">
+    <field name="name">interview.schedule.calendar</field>
+    <field name="model">hr.interview.schedule</field>
+    <field name="arch" type="xml">
+        <calendar string="Calendrier des entretiens"
+                  date_start="interview_date"
+                  color="hr_id">
+            <field name="name"/>
+            <field name="applicant_id"/>
+            <field name="job_id"/>
+        </calendar>
+    </field>
+</record>
+
+<!-- Action for Interview Schedule -->
+<record id="action_interview_schedule" model="ir.actions.act_window">
+    <field name="name">Les entretiens</field>
+    <field name="res_model">hr.interview.schedule</field>
+    <field name="context">{}</field>
+    <!-- Modify the domain to show all records -->
+    <field name="domain">[]</field> <!-- Remove the filter based on applicant_id -->
+</record>
+    ####################################################
+<!-- Button on Applicant Form View to View Interviews -->
+<record id="view_hr_applicant_form_inherit_calendar_button" model="ir.ui.view">
+    <field name="name">hr.applicant.form.inherit.calendar.button</field>
+    <field name="model">hr.applicant</field>
+    <field name="inherit_id" ref="hr_recruitment.hr_applicant_view_form"/>
+    <field name="arch" type="xml">
+        <xpath expr="//button[@name='action_makeMeeting']" position="after">
+            <button name="%(action_interview_schedule_event)d"
+                    type="action"
+                    class="oe_stat_button"
+                    icon="fa-calendar"
+                    invisible="not id">
+                <div class="o_field_widget o_stat_info">
+                    <span class="o_stat_text">Entretien</span>
+                    <span class="o_stat_value">Voir</span>
+                </div>
+            </button>
+        </xpath>
+    </field>
+</record>
+
+
+    <!-- 1. Vue formulaire pour l'entretien -->
+<record id="view_hr_interview_form" model="ir.ui.view">
+    <field name="name">hr.interview.form</field>
+    <field name="model">hr.interview</field>
+    <field name="arch" type="xml">
+        <form string="Entretien">
+            <sheet>
+                <group>
+                    <field name="candidate_id"/>
+                    <field name="date"/>
+                    <field name="interviewer"/>
+                    <field name="result"/>
+                    <field name="notes"/>
+                    <field name="feedback"/>
+                </group>
+            </sheet>
+        </form>
+    </field>
+</record>
+
+<!-- 2. Vue liste (tree) -->
+<record id="view_hr_interview_tree" model="ir.ui.view">
+    <field name="name">hr.interview.tree</field>
+    <field name="model">hr.interview</field>
+    <field name="arch" type="xml">
+        <tree string="Entretiens">
+            <field name="candidate_id"/>
+            <field name="date"/>
+            <field name="interviewer"/>
+            <field name="result"/>
+            <field name="feedback"/>
+        </tree>
+    </field>
+</record>
+
+
+
+
+
+<record id="view_interview_feedback_wizard_form1" model="ir.ui.view">
+    <field name="name">interview.feedback.wizard.form</field>
+    <field name="model">interview.feedback.wizard1</field>
+    <field name="arch" type="xml">
+        <form string="Feedback Manager" >
+            <sheet>
+                <group>
+                    <field name="interview_id" invisible="1"/>
+                    <field name="manager_id"/>
+                    <field name="manager_feedback"/>
+                    <field name="priority" widget="priority" field_id="priority_0"/>
+                </group>
+                <footer>
+                    <button string="Valider" type="object" name="action_submit_feedback" class="btn-primary"/>
+                    <button string="Annuler" class="btn-secondary" special="cancel"/>
+
+                </footer>
+            </sheet>
+        </form>
+    </field>
+</record>
+
+<record id="view_interview_feedback_wizard_form2" model="ir.ui.view">
+    <field name="name">interview.feedback.wizard.form</field>
+    <field name="model">interview.feedback.wizard2</field>
+    <field name="arch" type="xml">
+        <form string="Feedback RH" >
+            <sheet>
+                <group>
+                    <field name="interview_id" invisible="1"/>
+                    <field name="rh_id" />
+                    <field name="rh_feedback"/>
+                    <field name="priority" widget="priority" field_id="priority_0"/>
+                </group>
+                <footer>
+                    <button string="Valider" type="object" name="action_submit_feedback" class="btn-primary"/>
+                    <button string="Annuler" class="btn-secondary" special="cancel"/>
+                </footer>
+            </sheet>
+        </form>
+    </field>
+</record>
+<!-- Hériter de la vue formulaire de calendar.event pour ajouter le champ catégorie -->
+<record id="view_calendar_event_form_inherit" model="ir.ui.view">
+    <field name="name">calendar.event.form.inherit</field>
+    <field name="model">calendar.event</field>
+    <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+    <field name="arch" type="xml">
+        <xpath expr="//field[@name='start']" position="before">
+            <field name="is_entretien" />
+        </xpath>
+    </field>
+</record>
+<record id="view_calendar_event_tree_inherit" model="ir.ui.view">
+    <field name="name">calendar.event.tree.inherit</field>
+    <field name="model">calendar.event</field>
+    <field name="inherit_id" ref="calendar.view_calendar_event_tree"/>
+    <field name="arch" type="xml">
+        <xpath expr="//field[@name='name']" position="after">
+            <field name="is_entretien_text"/>
+        </xpath>
+    </field>
+</record>
+
+####################################################################################
+<record id="action_interview_schedule_event" model="ir.actions.act_window">
+    <field name="name">Les entretiens</field>
+    <field name="res_model">calendar.event</field>
+    <field name="view_mode">tree,form</field>
+    <field name="domain">[('applicant_id', '=', active_id), ('is_entretien', '=', True)]</field>
+    <field name="context">{'default_applicant_id': active_id, 'default_is_entretien': True}</field>
+</record>
+#################################################
+<record id="action_hr_interview" model="ir.actions.act_window">
+    <field name="name">Entretiens</field>
+    <field name="res_model">hr.interview</field>
+    <field name="view_mode">tree,form</field>
+    <field name="view_id" ref="view_hr_interview_tree"/>
+    <field name="target">current</field> <!-- ou 'new' pour une pop-up -->
+</record>
+<!-- Action pour afficher la vue du calendrier (liste d'événements) -->
+<record id="action_candidate_meetings" model="ir.actions.act_window">
+    <field name="name">Meetings Candidats</field>
+    <field name="res_model">calendar.event</field>
+    <field name="view_mode">list</field>
+    <field name="context">{}</field>
+    <field name="domain">[('is_entretien', '=', True)]</field>
+</record>
+
+ <!-- 1. Menu principal "Entretien" sous le menu "Recrutement" -->
+<menuitem id="menu_interview"
+          name="Les entretiens"
+          parent="hr_recruitment.menu_hr_recruitment_root" />
+
+<!-- Sous-menu dans le menu Recrutement -->
+<menuitem id="menu_candidate_meetings"
+          name="Meetings Candidats"
+          parent="menu_interview"
+          action="action_candidate_meetings"/>
+
+<!-- 3. Sous-menu pour "Feedback des entretiens" -->
+<menuitem id="menu_interview_feedback"
+          name="Feedback des entretiens"
+          parent="menu_interview"
+          action="action_hr_interview" />
+
+
+    <menuitem id="menu_hr_materials_access" name="Ressources et Accès" parent="hr.menu_hr_root"/>
+    <menuitem id="menu_hr_materials" name="Matériels" parent="menu_hr_materials_access" action="employee_material_action"/>
+    <menuitem id="menu_hr_access" name="Accès" parent="menu_hr_materials_access" action="employee_access_action"/>
 
     <!-- hr.applicant view -->
     <record id="view_hr_applicant_form_inherit_cv" model="ir.ui.view">
@@ -184,10 +587,94 @@
         </field>
     </record>
 
-    <!-- Website template -->
-    <template id="website_hr_recruitment_apply_form_inherit" inherit_id="website_hr_recruitment.apply">
-        <xpath expr="//input[@name='Resume']" position="replace">
-            <input type="file" name="cv_file" accept=".pdf" required="1"/>
-        </xpath>
-    </template>
+        <!-- Les Forrrmaaaaaaationssssssssz -->
+<record id="view_training_course_form" model="ir.ui.view">
+    <field name="name">training.course.form</field>
+    <field name="model">training.course</field>
+    <field name="arch" type="xml">
+      <form string="Formation">
+        <sheet>
+          <group>
+            <field name="name"/>
+            <field name="description"/>
+            <field name="trainer_id"/>
+          </group>
+          <notebook>
+            <page string="Sessions">
+              <field name="session_ids">
+                <tree editable="bottom">
+                  <field name="name"/>
+                  <field name="start_date"/>
+                  <field name="end_date"/>
+                </tree>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+<record id="view_training_course_tree" model="ir.ui.view">
+    <field name="name">training.course.tree</field>
+    <field name="model">training.course</field>
+    <field name="arch" type="xml">
+        <tree string="Les Formations">
+            <field name="name"/>
+            <field name="description"/>
+            <field name="trainer_id"/>
+        </tree>
+    </field>
+</record>
+  <record id="view_training_session_form" model="ir.ui.view">
+    <field name="name">training.session.form</field>
+    <field name="model">training.session</field>
+    <field name="arch" type="xml">
+      <form string="Session de Formation">
+        <sheet>
+          <group>
+            <field name="name"/>
+            <field name="course_id"/>
+            <field name="start_date"/>
+            <field name="end_date"/>
+            <field name="trainer_id"/>
+            <field name="participant_ids" widget="many2many_tags"/>
+            <field name="notes"/>
+              <field name="meet_link"/>
+
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+<record id="view_training_session_tree" model="ir.ui.view">
+    <field name="name">training.session.tree</field>
+    <field name="model">training.session</field>
+    <field name="arch" type="xml">
+        <tree string="Les sessions">
+            <field name="name"/>
+            <field name="course_id"/>
+            <field name="trainer_id"/>
+            <field name="participant_ids" widget="many2many_tags"/>
+            <field name="notes"/>
+        </tree>
+    </field>
+  </record>
+
+
+  <record id="action_training_course" model="ir.actions.act_window">
+    <field name="name">Formations</field>
+    <field name="res_model">training.course</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+
+  <record id="action_training_session" model="ir.actions.act_window">
+    <field name="name">Sessions</field>
+    <field name="res_model">training.session</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+
+    <menuitem id="menu_training_root" name="Formations" parent="hr.menu_hr_root"/>
+    <menuitem id="menu_training_course" name="Formations" parent="menu_training_root" action="action_training_course"/>
+    <menuitem id="menu_training_session" name="Sessions" parent="menu_training_root" action="action_training_session"/>
+
 </odoo>
