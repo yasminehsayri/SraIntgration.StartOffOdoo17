@@ -396,18 +396,7 @@
     <!-- Modify the domain to show all records -->
     <field name="domain">[]</field> <!-- Remove the filter based on applicant_id -->
 </record>
-
-
-
-
-<!-- Action for Interview Schedule -->
-<record id="action_interview_schedule_applicant" model="ir.actions.act_window">
-    <field name="name">Les entretiens</field>
-    <field name="res_model">hr.interview.schedule</field>
-    <field name="context">{'default_applicant_id': active_id}</field> <!-- Pass the active_id to the context -->
-    <field name="domain">[('applicant_id', '=', active_id)]</field> <!-- Filter by applicant_id -->
-</record>
-
+    ####################################################
 <!-- Button on Applicant Form View to View Interviews -->
 <record id="view_hr_applicant_form_inherit_calendar_button" model="ir.ui.view">
     <field name="name">hr.applicant.form.inherit.calendar.button</field>
@@ -415,7 +404,7 @@
     <field name="inherit_id" ref="hr_recruitment.hr_applicant_view_form"/>
     <field name="arch" type="xml">
         <xpath expr="//button[@name='action_makeMeeting']" position="after">
-            <button name="%(action_interview_schedule_applicant)d"
+            <button name="%(action_interview_schedule_event)d"
                     type="action"
                     class="oe_stat_button"
                     icon="fa-calendar"
@@ -466,13 +455,7 @@
 </record>
 
 
-<record id="action_hr_interview" model="ir.actions.act_window">
-    <field name="name">Entretiens</field>
-    <field name="res_model">hr.interview</field>
-    <field name="view_mode">tree,form</field>
-    <field name="view_id" ref="view_hr_interview_tree"/>
-    <field name="target">current</field> <!-- ou 'new' pour une pop-up -->
-</record>
+
 
 
 <record id="view_interview_feedback_wizard_form1" model="ir.ui.view">
@@ -517,22 +500,70 @@
         </form>
     </field>
 </record>
-    <!-- 1. Menu principal "Entretien" sous le menu "Recrutement" -->
+<!-- Hériter de la vue formulaire de calendar.event pour ajouter le champ catégorie -->
+<record id="view_calendar_event_form_inherit" model="ir.ui.view">
+    <field name="name">calendar.event.form.inherit</field>
+    <field name="model">calendar.event</field>
+    <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+    <field name="arch" type="xml">
+        <xpath expr="//field[@name='start']" position="before">
+            <field name="is_entretien" />
+        </xpath>
+    </field>
+</record>
+<record id="view_calendar_event_tree_inherit" model="ir.ui.view">
+    <field name="name">calendar.event.tree.inherit</field>
+    <field name="model">calendar.event</field>
+    <field name="inherit_id" ref="calendar.view_calendar_event_tree"/>
+    <field name="arch" type="xml">
+        <xpath expr="//field[@name='name']" position="after">
+            <field name="is_entretien_text"/>
+        </xpath>
+    </field>
+</record>
+
+####################################################################################
+<record id="action_interview_schedule_event" model="ir.actions.act_window">
+    <field name="name">Les entretiens</field>
+    <field name="res_model">calendar.event</field>
+    <field name="view_mode">tree,form</field>
+    <field name="domain">[('applicant_id', '=', active_id), ('is_entretien', '=', True)]</field>
+    <field name="context">{'default_applicant_id': active_id, 'default_is_entretien': True}</field>
+</record>
+#################################################
+<record id="action_hr_interview" model="ir.actions.act_window">
+    <field name="name">Entretiens</field>
+    <field name="res_model">hr.interview</field>
+    <field name="view_mode">tree,form</field>
+    <field name="view_id" ref="view_hr_interview_tree"/>
+    <field name="target">current</field> <!-- ou 'new' pour une pop-up -->
+</record>
+<!-- Action pour afficher la vue du calendrier (liste d'événements) -->
+<record id="action_candidate_meetings" model="ir.actions.act_window">
+    <field name="name">Meetings Candidats</field>
+    <field name="res_model">calendar.event</field>
+    <field name="view_mode">list</field>
+    <field name="context">{}</field>
+    <field name="domain">[('is_entretien', '=', True)]</field>
+</record>
+
+ <!-- 1. Menu principal "Entretien" sous le menu "Recrutement" -->
 <menuitem id="menu_interview"
           name="Les entretiens"
           parent="hr_recruitment.menu_hr_recruitment_root" />
 
-<!-- 2. Sous-menu pour "Horaires des entretiens" -->
-<menuitem id="menu_interview_schedule"
-          name="Horaires des entretiens"
+<!-- Sous-menu dans le menu Recrutement -->
+<menuitem id="menu_candidate_meetings"
+          name="Meetings Candidats"
           parent="menu_interview"
-          action="action_interview_schedule" />
+          action="action_candidate_meetings"/>
 
 <!-- 3. Sous-menu pour "Feedback des entretiens" -->
 <menuitem id="menu_interview_feedback"
           name="Feedback des entretiens"
           parent="menu_interview"
           action="action_hr_interview" />
+
 
     <menuitem id="menu_hr_materials_access" name="Ressources et Accès" parent="hr.menu_hr_root"/>
     <menuitem id="menu_hr_materials" name="Matériels" parent="menu_hr_materials_access" action="employee_material_action"/>

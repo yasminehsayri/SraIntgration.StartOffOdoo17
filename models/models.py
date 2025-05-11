@@ -452,6 +452,19 @@ class InterviewFeedbackWizard2(models.Model):
                 'rh_feedback': self.rh_feedback,
 
             })
+
+class CalendarEventInherit(models.Model):
+    _inherit = 'calendar.event'
+
+    is_entretien = fields.Boolean(string="Entretien")
+    is_entretien_text = fields.Char(string="Entretien", compute="_compute_is_entretien_text")
+    applicant_id = fields.Many2one('hr.applicant', string="Candidat")
+
+    @api.depends('is_entretien')
+    def _compute_is_entretien_text(self):
+        for record in self:
+            record.is_entretien_text = "Oui" if record.is_entretien else "Non"
+
 class HrInterview(models.Model):
     _name = 'hr.interview'
     _description = 'Entretien Candidat'
