@@ -184,7 +184,7 @@ class CandidateCV(models.Model):
     application_date = fields.Date(string="Date de postulation", default=fields.Date.today)
     departement = fields.Char(string="Département")
     survey_input_ids = fields.One2many(
-        'survey.user_input', 'partner_id', string='Résultats du test'
+        'survey.user_input', 'applicant_id', string='Résultats du test' , domain="[('applicant_id', '=', applicant_id)]"
     )
     scoring_percentage = fields.Float(
         string="Score Test (%)",
@@ -202,44 +202,46 @@ class CandidateCV(models.Model):
         }
         _logger.error("Clé API Hugging Face okk.")
         for record in self:
-            if record.extracted_text:
+            if not record.extracted_text:
+                record.resume_summary = "[No Text Available]"
+                continue
+            try:
+                # Limiter à 1024 caractères pour éviter les erreurs de token
+                cv_text = re.sub(r'\s+', ' ', record.extracted_text).strip()[:1024]
+                _logger.info("Texte extrait du CV : %s", cv_text)
+                # Prompt ciblé en français
+                prompt = (
+                    "Résumez le CV suivant en français en 3 sections distinctes : Expériences, Compétences, et Formation. "
+                    "Pour chaque section, listez les points clés sous forme de puces courtes et précises. "
+                    "Ignorez les informations motivationnelles (ex. : 'motivé', 'enthousiaste') et les redondances. "
+                    "Corrigez les erreurs de formatage (ex. : 'bacc alau r é at' devient 'Baccalauréat'). "
+                    "Voici le texte extrait du CV à résumer :\n"
+                    f"{cv_text}"
+                )
 
-
-                try:
-                    # Limiter à 1024 caractères pour éviter les erreurs de token
-                    cv_text = record.extracted_text[:1024]
-                    _logger.info("Texte extrait du CV : %s", cv_text)
-                    # Prompt ciblé en français
-                    prompt = (
-                            "Résumez le CV suivant en quelques lignes. "
-                            "Mentionnez les expériences clés, les compétences techniques, et les diplômes principaux. "
-                            "Utilisez des phrases courtes et fluides. "
-                            "Voici le texte extrait du CV à résumer :\n"
-                            + record.extracted_text
-                    )
-
-                    data = {
+                data = {
                         "inputs": prompt,
                         "parameters": {
                             "temperature": 0.3,
-                            "max_new_tokens": 200
+                            "max_new_tokens": 250
                         }
                     }
 
-                    response = requests.post(api_url, headers=headers, json=data)
-                    _logger.info("Réponse API Hugging Face : %s", response.json())
+                response = requests.post(api_url, headers=headers, json=data)
+                _logger.info("Réponse API Hugging Face : %s", response.json())
 
-                    if response.status_code == 200:
-                        result = response.json()
-                        summary = result[0]["generated_text"].split("CV:")[-1].strip()
-                        record.resume_summary = summary
-                    else:
-                        _logger.error("Hugging Face Error: %s - %s", response.status_code, response.text)
-                        record.resume_summary = f"[Error {response.status_code}]"
+                if response.status_code == 200:
+                    result = response.json()
+                    summary = result[0]["generated_text"].strip()
+                    summary = re.sub(r'\n\s*\n', '\n', summary)  # Remove excessive newlines
+                    record.resume_summary = summary
+                else:
+                    _logger.error("Hugging Face Error: %s - %s", response.status_code, response.text)
+                    record.resume_summary = f"[Error {response.status_code}]"
 
-                except Exception as e:
-                    _logger.exception("Exception during CV summary generation: %s", str(e))
-                    record.resume_summary = "[Processing Error]"
+            except Exception as e:
+                _logger.exception("Exception during CV summary generation: %s", str(e))
+                record.resume_summary = "[Processing Error]"
     @api.model
     def create(self, vals):
         _logger.info("Creating hr.candidate.cv with vals: %s", vals)
