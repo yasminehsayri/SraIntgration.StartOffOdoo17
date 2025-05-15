@@ -532,3 +532,49 @@ class TrainingSession(models.Model):
     participant_ids = fields.Many2many('hr.employee', string='Participants')
     notes = fields.Text(string='Notes')
     meet_link = fields.Char(string="Lien de la réunion (Google Meet, Zoom...)")
+
+
+class ContractChangeRequest(models.Model):
+    _name = 'contract.change.request'
+    _description = 'Demande de modification de contrat'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
+
+    employee_id = fields.Many2one('hr.employee', string='Employé', required=True, default=lambda self: self.env.user.employee_id, tracking=True)
+    contract_id = fields.Many2one('hr.contract', string='Contrat concerné', required=True, tracking=True)
+    change_description = fields.Text(string="Description du changement souhaité", required=True)
+    attachment = fields.Binary(string="Pièce jointe")
+    state = fields.Selection([
+        ('draft', 'Brouillon'),
+        ('submitted', 'Soumis'),
+        ('approved', 'Approuvé'),
+        ('rejected', 'Rejeté'),
+    ], string='Statut', default='draft', tracking=True)
+    request_date = fields.Date('Date de demande', default=fields.Date.today, tracking=True)
+
+    def action_submit(self):
+        self.write({'state': 'submitted'})
+        self.activity_schedule('mail.mail_activity_data_todo', user_id=self.contract_id.hr_responsible_id.id if self.contract_id.hr_responsible_id else self.env.user.id, summary="Nouvelle demande de contrat")
+
+    def action_approve(self):
+        self.write({'state': 'approved'})
+        self.activity_feedback(['mail.mail_activity_data_todo'])
+
+    def action_reject(self):
+        self.write({'state': 'rejected'})
+        self.activity_feedback(['mail.mail_activity_data_todo'])
+
+
+class HrContract(models.Model):
+    _inherit = 'hr.contract'
+
+    change_request_ids = fields.One2many('contract.change.request', 'contract_id', string='Demandes de modification')
+
+    def action_view_change_requests(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Demandes de modification',
+            'res_model': 'contract.change.request',
+            'view_mode': 'tree,form',
+            'domain': [('contract_id', '=', self.id)],
+            'context': {'default_contract_id': self.id, 'default_employee_id': self.employee_id.id},
+        }

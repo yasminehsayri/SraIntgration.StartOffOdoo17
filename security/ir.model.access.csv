@@ -17,4 +17,4 @@ access_training_course,training_course,model_training_course,base.group_user,1,1
 access_training_session,training_session,model_training_session,base.group_user,1,1,1,1
 access_employee_material,employee.material,model_employee_material,base.group_user,1,1,1,1
 access_employee_access,employee.access,model_employee_access,base.group_user,1,1,1,1
-
+access_contract_change_request,contract.change.request,model_contract_change_request,base.group_user,1,1,1,1

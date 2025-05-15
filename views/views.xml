@@ -608,4 +608,51 @@
     <menuitem id="menu_training_course" name="Formations" parent="menu_training_root" action="action_training_course"/>
     <menuitem id="menu_training_session" name="Sessions" parent="menu_training_root" action="action_training_session"/>
 
+
+<record id="view_contract_change_request_form" model="ir.ui.view">
+    <field name="name">contract.change.request.form</field>
+    <field name="model">contract.change.request</field>
+    <field name="arch" type="xml">
+        <form string="Demande de modification de contrat">
+            <header>
+                <button name="action_submit" type="object" string="Soumettre"/>
+                <button name="action_approve" type="object" string="Approuver"/>
+                <button name="action_reject" type="object" string="Rejeter"/>
+                <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved,rejected"/>
+            </header>
+            <sheet>
+                <group>
+                    <field name="employee_id" readonly="1"/>
+                    <field name="contract_id"/>
+                    <field name="change_description"/>
+                    <!-- Enlève le champ ci-dessous s’il n'existe pas -->
+                    <!-- <field name="attachment" filename="attachment_filename"/> -->
+                </group>
+            </sheet>
+        </form>
+    </field>
+</record>
+
+
+<record id="view_contract_change_request_tree" model="ir.ui.view">
+    <field name="name">contract.change.request.tree</field>
+    <field name="model">contract.change.request</field>
+    <field name="arch" type="xml">
+        <tree string="Demandes de modification">
+            <field name="employee_id"/>
+            <field name="contract_id"/>
+            <field name="state"/>
+        </tree>
+    </field>
+</record>
+<record id="action_contract_change_request" model="ir.actions.act_window">
+    <field name="name">Demandes de modification de contrat</field>
+    <field name="res_model">contract.change.request</field>
+    <field name="view_mode">tree,form</field>
+</record>
+
+<menuitem id="menu_hr_contract_request" name="Les contrat" parent="hr.menu_hr_root"/>
+<menuitem id="menu_hr_contract_request_action" name="Demandes de modification"
+          parent="menu_hr_contract_request" action="action_contract_change_request"/>
+
 </odoo>
