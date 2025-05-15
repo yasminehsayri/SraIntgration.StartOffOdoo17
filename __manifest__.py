@@ -10,8 +10,8 @@
         Long description of module's purpose
     """,
 
-    'author': "My Company",
-    'website': "https://www.yourcompany.com",
+    'author': "SRA",
+    'website': "https://www.SRA.com",
 
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/16.0/odoo/addons/base/data/ir_module_category_data.xml
@@ -33,4 +33,6 @@
         'demo/demo.xml',
     ],
     'external_dependencies': {'python': ['PyPDF2']},
+
 }
+
