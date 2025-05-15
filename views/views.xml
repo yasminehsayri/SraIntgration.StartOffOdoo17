@@ -325,7 +325,7 @@
                     <group>
                         <field name="job_id"/>
                         <field name="departement"/>
-                        <field name="description"/>
+                        <field name="description" widget="textarea" cols="50" rows="5"/>
                     </group>
                 </sheet>
             </form>

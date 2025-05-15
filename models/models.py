@@ -394,7 +394,7 @@ class JobRequirement(models.Model):
 
     job_id = fields.Many2one('hr.job', string="Poste associé", required=True, ondelete='cascade')
     departement = fields.Char(string="Département", required=True)
-    description = fields.Char(string="Description", required=True)
+    description = fields.Text(string="Description", required=True)
     user_id = fields.Many2one('res.users', 'Responsable RH', default=lambda self: self.env.user)
 
 class InterviewSchedule(models.Model):
