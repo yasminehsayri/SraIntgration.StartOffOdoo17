@@ -45,6 +45,7 @@
                 <sheet>
                     <group>
                         <field name="material_name"/>
+                        <field name="category"/>
                         <field name="employee_id"/>
                         <field name="serial_number"/>
                         <field name="description"/>
@@ -61,6 +62,7 @@
         <field name="arch" type="xml">
             <tree string=" Materials">
                 <field name="material_name"/>
+                <field name="category"/>
                 <field name="serial_number"/>
                 <field name="is_assigned" />
             </tree>
@@ -651,8 +653,9 @@
     <field name="view_mode">tree,form</field>
 </record>
 
-<menuitem id="menu_hr_contract_request" name="Les contrat" parent="hr.menu_hr_root"/>
-<menuitem id="menu_hr_contract_request_action" name="Demandes de modification"
-          parent="menu_hr_contract_request" action="action_contract_change_request"/>
-
+<menuitem id="menu_hr_request" name="Les Demandes" parent="hr.menu_hr_root"/>
+<menuitem id="menu_hr_contract_request_action" name="Demandes de modification de contrat"
+          parent="menu_hr_request" action="action_contract_change_request"/>
+<menuitem id="menu_hr_offboarding_request_action" name="Demandes de Sortie"
+          parent="menu_hr_request" action="action_contract_change_request"/>
 </odoo>

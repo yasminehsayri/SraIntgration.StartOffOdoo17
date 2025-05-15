@@ -368,6 +368,11 @@ class EmployeeMaterial(models.Model):
 
     employee_id = fields.Many2one('hr.employee', string='Employee', ondelete='cascade')
     material_name = fields.Char(string='Material Name', required=True)
+    category = fields.Selection([
+        ('informatique', 'Équipement informatique'),
+        ('communication', 'Communication'),
+        ('mobilier', 'Mobilier')
+    ], string="Catégorie")
     description = fields.Text(string='Description')
     date_assigned = fields.Date(string='Date Assigned')
     serial_number = fields.Char(string="Numéro de série")
