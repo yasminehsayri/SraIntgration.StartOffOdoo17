@@ -653,9 +653,93 @@
     <field name="view_mode">tree,form</field>
 </record>
 
+
+<record id="view_employee_exit_request_form" model="ir.ui.view">
+    <field name="name">employee.exit.request.form</field>
+    <field name="model">employee.exit.request</field>
+    <field name="arch" type="xml">
+        <form string="Demande de sortie">
+            <header>
+                <button name="action_submit" type="object" string="Soumettre" />
+                <button name="action_approve" type="object" string="Approuver"/>
+                <button name="action_reject" type="object" string="Rejeter" />
+                <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved,rejected"/>
+            </header>
+            <sheet>
+                <group>
+                    <field name="name"/>
+                    <field name="employee_id"/>
+                    <field name="exit_type"/>
+                    <field name="reason"/>
+                    <field name="current_tasks" placeholder="Décrivez vos tâches actuelles ici..." />
+                </group>
+            </sheet>
+        </form>
+    </field>
+</record>
+
+    <record id="view_employee_exit_request_tree" model="ir.ui.view">
+    <field name="name">employee.exit.request.tree</field>
+    <field name="model">employee.exit.request</field>
+    <field name="arch" type="xml">
+        <tree string="Demandes de sortie">
+            <field name="name"/>
+            <field name="employee_id"/>
+            <field name="exit_type"/>
+            <field name="state"/>
+        </tree>
+    </field>
+</record>
+<record id="action_employee_exit_request" model="ir.actions.act_window">
+    <field name="name">Demandes de sortie</field>
+    <field name="res_model">employee.exit.request</field>
+    <field name="view_mode">tree,form</field>
+</record>
+    <record id="view_employee_handover_line_tree" model="ir.ui.view">
+    <field name="name">employee.handover.line.tree</field>
+    <field name="model">employee.handover.line</field>
+    <field name="arch" type="xml">
+        <tree string="Lignes de passation">
+            <field name="employee_id"/>
+            <field name="exit_request_id"/>
+            <field name="item_type"/>
+            <field name="item_name"/>
+            <field name="assigned_to"/>
+            <field name="is_returned"/>
+
+        </tree>
+    </field>
+</record>
+<record id="view_employee_handover_line_form" model="ir.ui.view">
+    <field name="name">employee.handover.line.form</field>
+    <field name="model">employee.handover.line</field>
+    <field name="arch" type="xml">
+        <form string="Ligne de passation">
+            <sheet>
+                <group>
+                    <field name="employee_id"/>
+                    <field name="exit_request_id"/>
+                    <field name="item_type"/>
+                    <field name="item_name"/>
+                    <field name="assigned_to"/>
+                    <field name="is_returned"/>
+                    <field name="notes"/>
+                </group>
+            </sheet>
+        </form>
+    </field>
+</record>
+<record id="action_employee_handover_line" model="ir.actions.act_window">
+    <field name="name">Lignes de passation</field>
+    <field name="res_model">employee.handover.line</field>
+    <field name="view_mode">tree,form</field>
+</record>
+
 <menuitem id="menu_hr_request" name="Les Demandes" parent="hr.menu_hr_root"/>
 <menuitem id="menu_hr_contract_request_action" name="Demandes de modification de contrat"
           parent="menu_hr_request" action="action_contract_change_request"/>
 <menuitem id="menu_hr_offboarding_request_action" name="Demandes de Sortie"
-          parent="menu_hr_request" action="action_contract_change_request"/>
+          parent="menu_hr_request" action="action_employee_exit_request"/>
+<menuitem id="menu_hr_handover_line_action" name="Passation"
+          parent="menu_hr_request" action="action_employee_handover_line"/>
 </odoo>

@@ -583,3 +583,62 @@ class HrContract(models.Model):
             'domain': [('contract_id', '=', self.id)],
             'context': {'default_contract_id': self.id, 'default_employee_id': self.employee_id.id},
         }
+
+class EmployeeExitRequest(models.Model):
+    _name = 'employee.exit.request'
+    _description = 'Demande de sortie'
+
+    name = fields.Char(string="Titre", required=True)
+    employee_id = fields.Many2one('hr.employee', string="Employé", required=True)
+    exit_type = fields.Selection([('resignation', 'Démission'), ('termination', 'Licenciement')], string="Type de sortie", required=True)
+    reason = fields.Text(string="Raison")
+    current_tasks = fields.Text(string="Tâches actuelles", help="Décrire les tâches en cours à transférer")
+    state = fields.Selection([
+        ('draft', 'Brouillon'),
+        ('submitted', 'Soumis'),
+        ('approved', 'Approuvé'),
+        ('rejected', 'Rejeté')
+    ], default='draft', string="État")
+
+    def action_submit(self):
+        self.state = 'submitted'
+
+    def action_approve(self):
+        self.state = 'approved'
+
+    def action_reject(self):
+        self.state = 'rejected'
+
+class HandoverLine(models.Model):
+    _name = 'employee.handover.line'
+    _description = 'Ligne de passation'
+
+    exit_request_id = fields.Many2one(
+        'employee.exit.request',
+        string="Demande de sortie",
+        required=True,
+        domain=[('state', '=', 'approved')],
+        ondelete="cascade"
+    )
+    item_type = fields.Selection([
+        ('equipment', 'Matériel'),
+        ('access', 'Accès'),
+        ('document', 'Document'),
+    ], string="Type", required=True)
+    item_name = fields.Char(string="Nom de l’élément", required=True)
+    assigned_to = fields.Many2one('res.users', string="Transféré à")
+    is_returned = fields.Boolean(string="Restitué")
+    notes = fields.Text(string="Remarques")
+    handover_ids = fields.One2many('employee.handover.line', 'exit_request_id', string="Passation")
+    employee_id = fields.Many2one(
+        'hr.employee',
+        string="Employé",
+        compute='_compute_employee',
+        store=True,
+        readonly=True
+    )
+
+    @api.depends('exit_request_id')
+    def _compute_employee(self):
+        for line in self:
+            line.employee_id = line.exit_request_id.employee_id if line.exit_request_id else False

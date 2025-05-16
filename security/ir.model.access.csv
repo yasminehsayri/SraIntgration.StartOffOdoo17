@@ -18,3 +18,5 @@ access_training_session,training_session,model_training_session,base.group_user,
 access_employee_material,employee.material,model_employee_material,base.group_user,1,1,1,1
 access_employee_access,employee.access,model_employee_access,base.group_user,1,1,1,1
 access_contract_change_request,contract.change.request,model_contract_change_request,base.group_user,1,1,1,1
+access_employee_exit_request,employee.exit.request,model_employee_exit_request,base.group_user,1,1,1,1
+access_employee_handover_line,employee.handover.line,model_employee_handover_line,base.group_user,1,1,1,1
