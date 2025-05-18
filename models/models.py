@@ -642,3 +642,19 @@ class HandoverLine(models.Model):
     def _compute_employee(self):
         for line in self:
             line.employee_id = line.exit_request_id.employee_id if line.exit_request_id else False
+
+class TrainingCourse(models.Model):
+    _inherit = 'training.course'
+
+    training_material = fields.Binary(string="Document ou Vidéo", attachment=True)
+    training_material_filename = fields.Char(string="Nom du Fichier")
+    video_link = fields.Char(string="Lien Vidéo (YouTube, Vimeo, etc.)")
+    video_embed = fields.Html(string="Vidéo Intégrée", compute="_compute_video_embed")
+
+    def _compute_video_embed(self):
+        for record in self:
+            if record.video_link and 'youtube.com' in record.video_link:
+                video_id = record.video_link.split('v=')[-1]
+                record.video_embed = f'<iframe width="560" height="315" src="https://www.youtube.com/embed/{video_id}" frameborder="0" allowfullscreen></iframe>'
+            else:
+                record.video_embed = False
